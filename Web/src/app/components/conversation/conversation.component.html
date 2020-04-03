@@ -1,491 +1,561 @@
-<div class="layout">
-    <app-sidebar></app-sidebar>
+<div [ngClass]="theme ? 'dark' : 'light'">
 
-    <!-- content -->
-    <div class="content">
-
-        <!-- sidebar group -->
-        <div class="sidebar-group">
-
-            <!-- Chats sidebar -->
-            <div id="chats" class="sidebar active">
-                <header>
-                    <span>Chats</span>
-                    <ul class="list-inline">
-                        <li class="list-inline-item" data-toggle="tooltip" title="" data-original-title="New Group">
-                            <a class="btn btn-light" data-toggle="modal" data-target="#newGroup">
-                                <i class="fa fa-users"></i>
-                            </a>
-                        </li>
-                        <li class="list-inline-item">
-                            <a class="btn btn-light" data-toggle="tooltip" title="" data-navigation-target="friends"
-                                data-original-title="New Chat">
-                                <i class="ti-comment-alt"></i>
-                            </a>
-                        </li>
-                        <li class="list-inline-item d-lg-none d-sm-block">
-                            <a class="btn btn-light sidebar-close">
-                                <i class="ti-close"></i>
-                            </a>
-                        </li>
-                    </ul>
-                </header>
-                <!-- <form action="">
-                        <input type="text" class="form-control" placeholder="Search chat">
-                    </form> -->
-                <div class="sidebar-body">
-                    <ul class="list-group list-group-flush" *ngIf="userModel?.conversations.length != 0">
-                        <li class="list-group-item open-chat" *ngFor="let conversation of userModel?.conversations"
-                            (click)="selectConversation(conversation?.conversation?.conversationId)">
-                            <figure class="avatar avatar-state-success">
-                                <img src="./assets/dist/media/img/avataaars1.png" class="rounded-circle">
-                            </figure>
-                            <div class="users-list-body" *ngIf="conversation">
-                                <h5 [innerText]="conversation?.participants | participant">Patsy
-                                    Paulton</h5>
-                                <!-- <p>Traditional heading elscas sdscsd sdcsdsc</p> -->
-                                <p [innerText]="conversation?.messages | lastData :'messageContent'"></p>
-                                <div class="users-list-action">
-                                    <div class="new-message-count">2</div>
-                                </div>
-                            </div>
-                        </li>
-                    </ul>
-                    <p *ngIf="userModel?.conversations.length == 0">
-                        Yükleniyor...
-                    </p>
+    <!-- setting modal -->
+<div class="modal fade" id="settingModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-zoom" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="ti-settings"></i> Settings
+                </h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <i class="ti-close"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <ul class="nav nav-tabs" role="tablist">
+                    <li class="nav-item">
+                        <a class="nav-link active" data-toggle="tab" href="#manage" role="tab" aria-controls="account" aria-selected="true">Manage</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-toggle="tab" href="#notification" role="tab" aria-controls="notification" aria-selected="false">Notification</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-toggle="tab" href="#security" role="tab" aria-controls="contact" aria-selected="false">Security</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link delete" data-toggle="tab" href="#delete" role="tab" aria-controls="contact" aria-selected="false">Delete</a>
+                    </li>
+                </ul>
+                <div class="tab-content">
+                    <div class="tab-pane show active" id="manage" role="tabpanel">
+                        <div class="form-item custom-control custom-switch">
+                            <input type="checkbox" class="custom-control-input" [(ngModel)]="theme" (ngModelChange)="changeTheme(theme)" id="themeSwitch"/>
+                            <label class="custom-control-label" for="themeSwitch" [innerText]="theme ? 'Dark Theme' : 'Light Theme'"></label>
+                        </div>
+                    </div>
+                    <div class="tab-pane" id="notification" role="tabpanel">
+                        <div class="form-item custom-control custom-switch">
+                            <input type="checkbox" class="custom-control-input" [(ngModel)]="notify" (ngModelChange)="changeNotify(notify)" id="notifySwitch">
+                            <label class="custom-control-label" for="notifySwitch">Allow mobile notifications</label>
+                        </div>
+                    </div>
+                    <div class="tab-pane" id="security" role="tabpanel">
+                        <div class="form-item custom-control custom-switch">
+                            <input type="checkbox" class="custom-control-input" id="customSwitch9">
+                            <label class="custom-control-label" for="customSwitch9">Suggest changing passwords every month.</label>
+                        </div>
+                    </div>
+                    <div class="tab-pane" id="delete" role="tabpanel">
+                        <div class="form-item custom-control custom-switch">
+                            Delete
+                        </div>
+                    </div>
                 </div>
             </div>
-            <!-- ./ Chats sidebar -->
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- ./ setting modal -->
+<app-edit-profile></app-edit-profile>
 
-            <!-- Friends sidebar -->
-            <div id="friends" class="sidebar">
-                <header>
-                    <span>Friends</span>
-                    <ul class="list-inline">
-                        <li class="list-inline-item">
-                            <!-- <li class="list-inline-item" *ngFor="let u of users" (click)="selectUser(u)"> -->
-                            <a class="btn btn-light" data-toggle="modal" data-target="#addFriends">
-                                <i class="ti-plus btn-icon"></i> Add Friends
-                            </a>
-                        </li>
-                        <li class="list-inline-item d-lg-none d-sm-block">
-                            <a class="btn btn-light sidebar-close">
-                                <i class="ti-close"></i>
-                            </a>
-                        </li>
-                    </ul>
-                </header>
-                <!-- <form action="">
-                        <input type="text" class="form-control" placeholder="Search chat">
-                    </form> -->
-                <div class="sidebar-body">
-                    <ul class="list-group list-group-flush">
-                        <li class="list-group-item" *ngFor="let u of users" (click)="selectUser(u)">
-                            <div>
-                                <figure class="avatar">
+    <div class="layout">
+        <app-sidebar (unsubscribe)="unsubscription($event)"></app-sidebar>
+    
+        <!-- content -->
+        <div class="content">
+    
+            <!-- sidebar group -->
+            <div class="sidebar-group">
+    
+                <!-- Chats sidebar -->
+                <div id="chats" class="sidebar active">
+                    <header>
+                        <span>Chats</span>
+                        <ul class="list-inline">
+                            <li class="list-inline-item" data-toggle="tooltip" title="" data-original-title="New Group">
+                                <a class="btn btn-light" data-toggle="modal" data-target="#newGroup">
+                                    <i class="fa fa-users"></i>
+                                </a>
+                            </li>
+                            <li class="list-inline-item">
+                                <a class="btn btn-light" data-toggle="tooltip" title="" data-navigation-target="friends"
+                                    data-original-title="New Chat">
+                                    <i class="ti-comment-alt"></i>
+                                </a>
+                            </li>
+                            <li class="list-inline-item d-lg-none d-sm-block">
+                                <a class="btn btn-light sidebar-close">
+                                    <i class="ti-close"></i>
+                                </a>
+                            </li>
+                        </ul>
+                    </header>
+                    <!-- <form action="">
+                            <input type="text" class="form-control" placeholder="Search chat">
+                        </form> -->
+                    <div class="sidebar-body">
+                        <ul class="list-group list-group-flush" *ngIf="userModel?.conversations.length != 0">
+                            <li class="list-group-item open-chat" *ngFor="let conversation of userModel?.conversations"
+                                (click)="selectConversation(conversation?.conversation?.conversationId)">
+                                <figure class="avatar avatar-state-success">
                                     <img src="./assets/dist/media/img/avataaars1.png" class="rounded-circle">
                                 </figure>
-                            </div>
-                            <div class="users-list-body">
-                                <h5>{{u?.firstname}} {{u?.lastname}}</h5>
-                                <p>Lorem ipsum dolor sitsdc sdcsdc sdcsdcs</p>
-                                <div class="users-list-action action-toggle">
-                                    <div class="dropdown">
-                                        <a data-toggle="dropdown">
-                                            <i class="ti-more"></i>
-                                        </a>
-                                        <div class="dropdown-menu dropdown-menu-right">
-                                            <a class="dropdown-item">Open</a>
-                                            <a data-navigation-target="contact-information"
-                                                class="dropdown-item">Profile</a>
-                                            <a class="dropdown-item">Add to archive</a>
-                                            <a class="dropdown-item">Delete</a>
-                                        </div>
+                                <div class="users-list-body" *ngIf="conversation">
+                                    <h5 [innerText]="conversation?.participants | participant">Patsy
+                                        Paulton</h5>
+                                    <!-- <p>Traditional heading elscas sdscsd sdcsdsc</p> -->
+                                    <p class="last-message"[innerText]="conversation?.messages | lastData :'messageContent'"></p>
+                                    <div class="users-list-action">
+                                        <div class="new-message-count">2</div>
                                     </div>
                                 </div>
-                            </div>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-            <!-- ./ Friends sidebar -->
-
-            <!-- Favorites sidebar -->
-            <div id="favorites" class="sidebar">
-                <header>
-                    <span>Favorites</span>
-                    <ul class="list-inline">
-                        <li class="list-inline-item d-lg-none d-sm-block">
-                            <a class="btn btn-light sidebar-close">
-                                <i class="ti-close"></i>
-                            </a>
-                        </li>
-                    </ul>
-                </header>
-                <!-- <form action="">
-                        <input type="text" class="form-control" placeholder="Search favorites">
-                    </form> -->
-                <div class="sidebar-body">
-                    <ul class="list-group list-group-flush users-list">
-                        <li class="list-group-item">
-                            <div class="users-list-body">
-                                <h5>Jennica Kindred</h5>
-                                <p>I know how important this file is to you. You can trust me ;)</p>
-                                <div class="users-list-action action-toggle">
-                                    <div class="dropdown">
-                                        <a data-toggle="dropdown">
-                                            <i class="ti-more"></i>
-                                        </a>
-                                        <div class="dropdown-menu dropdown-menu-right">
-                                            <a class="dropdown-item">View Chat</a>
-                                            <a class="dropdown-item">Forward</a>
-                                            <a class="dropdown-item">Delete</a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </li>
-                        <li class="list-group-item">
-                            <div class="users-list-body">
-                                <h5>Marvin Rohan</h5>
-                                <p>Lorem ipsum dolor sitsdc sdcsdc sdcsdcs</p>
-                                <div class="users-list-action action-toggle">
-                                    <div class="dropdown">
-                                        <a data-toggle="dropdown">
-                                            <i class="ti-more"></i>
-                                        </a>
-                                        <div class="dropdown-menu dropdown-menu-right">
-                                            <a class="dropdown-item">View Chat</a>
-                                            <a class="dropdown-item">Forward</a>
-                                            <a class="dropdown-item">Delete</a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </li>
-                        <li class="list-group-item">
-                            <div class="users-list-body">
-                                <h5>Frans Hanscombe</h5>
-                                <p>Lorem ipsum dolor sitsdc sdcsdc sdcsdcs</p>
-                                <div class="users-list-action action-toggle">
-                                    <div class="dropdown">
-                                        <a data-toggle="dropdown">
-                                            <i class="ti-more"></i>
-                                        </a>
-                                        <div class="dropdown-menu dropdown-menu-right">
-                                            <a class="dropdown-item">View Chat</a>
-                                            <a class="dropdown-item">Forward</a>
-                                            <a class="dropdown-item">Delete</a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </li>
-                        <li class="list-group-item">
-                            <div class="users-list-body">
-                                <h5>Karl Hubane</h5>
-                                <p>Lorem ipsum dolor sitsdc sdcsdc sdcsdcs</p>
-                                <div class="users-list-action action-toggle">
-                                    <div class="dropdown">
-                                        <a data-toggle="dropdown">
-                                            <i class="ti-more"></i>
-                                        </a>
-                                        <div class="dropdown-menu dropdown-menu-right">
-                                            <a class="dropdown-item">View Chat</a>
-                                            <a class="dropdown-item">Forward</a>
-                                            <a class="dropdown-item">Delete</a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-            <!-- ./ Stars sidebar -->
-
-        </div>
-        <!-- ./ sidebar group -->
-
-        <!-- chat -->
-        <div class="chat">
-            <div class="chat-header" *ngIf="selectedConversation">
-                <div class="chat-header-user">
-                    <figure class="avatar avatar-lg">
-                        <img src="./assets/dist/media/img/avataaars1.png" class="rounded-circle">
-                    </figure>
-                    <div>
-                        <h5 [innerText]="selectedConversation?.participants | participant"></h5>
-                        <small class="text-muted">
-                            <i>Online</i>
-                        </small>
-                    </div>
-                </div>
-                <div class="chat-header-action">
-                    <ul class="list-inline">
-                        <li class="list-inline-item">
-                            <a class="btn btn-success colorW">
-                                <i class="fa fa-phone" aria-hidden="true"></i>
-                            </a>
-                        </li>
-                        <li class="list-inline-item">
-                            <a class="btn btn-secondary colorW">
-                                <i class="fa fa-video-camera" aria-hidden="true"></i>
-                            </a>
-                        </li>
-                        <li class="list-inline-item">
-                            <a class="btn btn-secondary colorW" data-toggle="dropdown">
-                                <i class="ti-more"></i>
-                            </a>
-                            <div class="dropdown-menu dropdown-menu-right">
-                                <a data-navigation-target="contact-information" class="dropdown-item">Profile</a>
-                                <a class="dropdown-item">Add to archive</a>
-                                <a class="dropdown-item">Delete</a>
-                                <div class="dropdown-divider"></div>
-                                <a class="dropdown-item">Block</a>
-                            </div>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-            <div #scrollMe class="chat-body" tabindex="1" id="style-1" *ngIf="selectedConversation">
-                <!-- .no-message -->
-                <!--
-                        <div class="no-message-container">
-                            <i class="fa fa-comments-o"></i>
-                            <p>Select a chat to read messages</p>
-                        </div>
-                        -->
-                <div class="messages">
-                    <div [class]="userModel?.user?.userId == message?.sender?.userId ? 'message-item outgoing-message' : 'message-item '"
-                        *ngFor="let message of selectedConversation?.messages">
-                        <div class="message-content">
-                            {{message?.messageContent}}
-                        </div>
-                        <div class="message-action">
-                            {{message?.createdTime | date : 'd/M/yy, h:mm a'}}
-                            <i class="ti-double-check"></i>
+                            </li>
+                        </ul>
+                        <div class="deneme">
+                            <p *ngIf="userModel?.conversations.length == 0 && hasConversation">
+                                Yükleniyor...
+                            </p>
+                            <p *ngIf="!hasConversation">
+                                Konuşma Yok
+                            </p>
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="chat-footer" *ngIf="selectedConversation">
-                <form [formGroup]="messageForm" (ngSubmit)="onSubmit()">
-                    <input type="text" formControlName="message" class="form-control" placeholder="Recipient's username"
-                        aria-label="Recipient's username" aria-describedby="button-addon2">
-                    <div class="form-buttons">
-                        <button class="btn btn-light btn-floating">
-                            <i class="fa fa-paperclip"></i>
-                        </button>
-                        <button class="btn btn-light btn-floating">
-                            <i class="fa fa-microphone"></i>
-                        </button>
-                        <button class="btn btn-primary btn-floating" type="submit">
-                            <i class="fa fa-send"></i>
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-        <!-- ./ chat -->
-
-        <div class="sidebar-group">
-            <div id="contact-information" [ngClass]="isProfileShow ? 'sidebar active' : 'sidebar'">
-                <header>
-                    <span>About</span>
-                    <ul class="list-inline">
-                        <li class="list-inline-item">
-                            <a class="btn btn-light sidebar-close">
-                                <i class="ti-close" (click)="closeProfile()"></i>
-                            </a>
-                        </li>
-                    </ul>
-                </header>
-                <div class="sidebar-body">
-                    <div class="pl-4 pr-4 text-center">
-                        <!-- <figure class="avatar avatar-state-danger avatar-xl mb-4"> -->
-                        <figure class="avatar avatar-xl mb-4">
-                            <img src="./assets/dist/media/img/avataaars1.png" class="rounded-circle">
-                        </figure>
-                        <h5 class="text-primary" [innerText]="selectedUser?.firstname + ' ' + selectedUser?.lastname">Frans Hanscombe</h5>
-                        <p class="text-muted">Last seen: Today</p>
-                    </div>
-                    <hr>
-                    <div class="pl-4 pr-4">
+                <!-- ./ Chats sidebar -->
+    
+                <!-- Friends sidebar -->
+                <div id="friends" class="sidebar">
+                    <header>
+                        <span>Friends</span>
                         <ul class="list-inline">
-                            <li class="list-inline-item" data-toggle="tooltip">
-                                <a class="btn btn-primary" data-toggle="modal" (click)="startConversation(selectedUser)">
-                                    <!-- <i class="fa fa-users"></i> -->
-                                    Message
-                                </a>
-                            </li>
                             <li class="list-inline-item">
-                                <a class="btn btn-primary" data-toggle="tooltip">
-                                    Follow
-                                    <!-- <i class="ti-comment-alt"></i> -->
+                                <!-- <li class="list-inline-item" *ngFor="let u of users" (click)="selectUser(u)"> -->
+                                <a class="btn btn-light" data-toggle="modal" data-target="#addFriends">
+                                    <i class="ti-plus btn-icon"></i> Add Friends
                                 </a>
                             </li>
-                            <li class="list-inline-item">
-                                <a class="btn btn-danger" data-toggle="tooltip" title="">
-                                    Block
-                                    <!-- <i class="ti-comment-alt"></i> -->
+                            <li class="list-inline-item d-lg-none d-sm-block">
+                                <a class="btn btn-light sidebar-close">
+                                    <i class="ti-close"></i>
                                 </a>
                             </li>
-                            
+                        </ul>
+                    </header>
+                    <!-- <form action="">
+                            <input type="text" class="form-control" placeholder="Search chat">
+                        </form> -->
+                    <div class="sidebar-body">
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item" *ngFor="let u of users" (click)="selectUser(u)">
+                                <div>
+                                    <figure class="avatar">
+                                        <img src="./assets/dist/media/img/avataaars1.png" class="rounded-circle">
+                                    </figure>
+                                </div>
+                                <div class="users-list-body">
+                                    <h5>{{u?.firstname}} {{u?.lastname}}</h5>
+                                    <p>Lorem ipsum dolor sitsdc sdcsdc sdcsdcs</p>
+                                    <div class="users-list-action action-toggle">
+                                        <div class="dropdown">
+                                            <a data-toggle="dropdown">
+                                                <i class="ti-more"></i>
+                                            </a>
+                                            <div class="dropdown-menu dropdown-menu-right">
+                                                <a class="dropdown-item">Open</a>
+                                                <a data-navigation-target="contact-information"
+                                                    class="dropdown-item">Profile</a>
+                                                <a class="dropdown-item">Add to archive</a>
+                                                <a class="dropdown-item">Delete</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
                         </ul>
                     </div>
-                    <hr>
-                    <div class="pl-4 pr-4">
-                        <h6>About</h6>
-                        <p class="text-muted">I love reading, traveling and discovering new things. You need to be happy
-                            in
-                            life.</p>
+                </div>
+                <!-- ./ Friends sidebar -->
+    
+                <!-- Favorites sidebar -->
+                <div id="favorites" class="sidebar">
+                    <header>
+                        <span>Favorites</span>
+                        <ul class="list-inline">
+                            <li class="list-inline-item d-lg-none d-sm-block">
+                                <a class="btn btn-light sidebar-close">
+                                    <i class="ti-close"></i>
+                                </a>
+                            </li>
+                        </ul>
+                    </header>
+                    <!-- <form action="">
+                            <input type="text" class="form-control" placeholder="Search favorites">
+                        </form> -->
+                    <div class="sidebar-body">
+                        <ul class="list-group list-group-flush users-list">
+                            <li class="list-group-item">
+                                <div class="users-list-body">
+                                    <h5>Jennica Kindred</h5>
+                                    <p>I know how important this file is to you. You can trust me ;)</p>
+                                    <div class="users-list-action action-toggle">
+                                        <div class="dropdown">
+                                            <a data-toggle="dropdown">
+                                                <i class="ti-more"></i>
+                                            </a>
+                                            <div class="dropdown-menu dropdown-menu-right">
+                                                <a class="dropdown-item">View Chat</a>
+                                                <a class="dropdown-item">Forward</a>
+                                                <a class="dropdown-item">Delete</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                            <li class="list-group-item">
+                                <div class="users-list-body">
+                                    <h5>Marvin Rohan</h5>
+                                    <p>Lorem ipsum dolor sitsdc sdcsdc sdcsdcs</p>
+                                    <div class="users-list-action action-toggle">
+                                        <div class="dropdown">
+                                            <a data-toggle="dropdown">
+                                                <i class="ti-more"></i>
+                                            </a>
+                                            <div class="dropdown-menu dropdown-menu-right">
+                                                <a class="dropdown-item">View Chat</a>
+                                                <a class="dropdown-item">Forward</a>
+                                                <a class="dropdown-item">Delete</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                            <li class="list-group-item">
+                                <div class="users-list-body">
+                                    <h5>Frans Hanscombe</h5>
+                                    <p>Lorem ipsum dolor sitsdc sdcsdc sdcsdcs</p>
+                                    <div class="users-list-action action-toggle">
+                                        <div class="dropdown">
+                                            <a data-toggle="dropdown">
+                                                <i class="ti-more"></i>
+                                            </a>
+                                            <div class="dropdown-menu dropdown-menu-right">
+                                                <a class="dropdown-item">View Chat</a>
+                                                <a class="dropdown-item">Forward</a>
+                                                <a class="dropdown-item">Delete</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                            <li class="list-group-item">
+                                <div class="users-list-body">
+                                    <h5>Karl Hubane</h5>
+                                    <p>Lorem ipsum dolor sitsdc sdcsdc sdcsdcs</p>
+                                    <div class="users-list-action action-toggle">
+                                        <div class="dropdown">
+                                            <a data-toggle="dropdown">
+                                                <i class="ti-more"></i>
+                                            </a>
+                                            <div class="dropdown-menu dropdown-menu-right">
+                                                <a class="dropdown-item">View Chat</a>
+                                                <a class="dropdown-item">Forward</a>
+                                                <a class="dropdown-item">Delete</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
                     </div>
-                    <hr>
-                    <div class="pl-4 pr-4">
-                        <h6>Phone</h6>
-                        <p class="text-muted">(555) 555 55 55</p>
+                </div>
+                <!-- ./ Stars sidebar -->
+    
+            </div>
+            <!-- ./ sidebar group -->
+    
+            <!-- chat -->
+            <div class="chat">
+                <div class="chat-header" *ngIf="selectedConversation">
+                    <div class="chat-header-user">
+                        <figure class="avatar avatar-lg">
+                            <img src="./assets/dist/media/img/avataaars1.png" class="rounded-circle">
+                        </figure>
+                        <div>
+                            <h5 [innerText]="selectedConversation?.participants | participant"></h5>
+                            <small class="text-muted">
+                                <i>Online</i>
+                            </small>
+                        </div>
                     </div>
-                    <hr>
-                    <!-- <div class="pl-4 pr-4">
-                        <h6>Media</h6>
-                        <div class="files">
+                    <div class="chat-header-action">
+                        <ul class="list-inline">
+                            <li class="list-inline-item">
+                                <a class="btn btn-success colorW">
+                                    <i class="fa fa-phone" aria-hidden="true"></i>
+                                </a>
+                            </li>
+                            <li class="list-inline-item">
+                                <a class="btn btn-secondary colorW">
+                                    <i class="fa fa-video-camera" aria-hidden="true"></i>
+                                </a>
+                            </li>
+                            <li class="list-inline-item">
+                                <a class="btn btn-secondary colorW" data-toggle="dropdown">
+                                    <i class="ti-more"></i>
+                                </a>
+                                <div class="dropdown-menu dropdown-menu-right">
+                                    <a data-navigation-target="contact-information" class="dropdown-item">Profile</a>
+                                    <a class="dropdown-item">Add to archive</a>
+                                    <a class="dropdown-item">Delete</a>
+                                    <div class="dropdown-divider"></div>
+                                    <a class="dropdown-item">Block</a>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div #scrollMe class="chat-body" tabindex="1" id="style-1" *ngIf="selectedConversation">
+                    <!-- .no-message -->
+                    <!--
+                            <div class="no-message-container">
+                                <i class="fa fa-comments-o"></i>
+                                <p>Select a chat to read messages</p>
+                            </div>
+                            -->
+                    <div class="messages">
+                        <div [class]="userModel?.user?.userId == message?.sender?.userId ? 'message-item outgoing-message' : 'message-item '"
+                            *ngFor="let message of selectedConversation?.messages">
+                            <div class="message-content">
+                                {{message?.messageContent}}
+                            </div>
+                            <div class="message-action">
+                                {{message?.createdTime | date : 'd/M/yy, h:mm a'}}
+                                <i class="ti-double-check"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="chat-footer" *ngIf="selectedConversation">
+                    <form [formGroup]="messageForm" (ngSubmit)="onSubmit()">
+                        <input type="text" formControlName="message" class="form-control" placeholder="Recipient's username"
+                            aria-label="Recipient's username" aria-describedby="button-addon2">
+                        <div class="form-buttons">
+                            <button class="btn btn-light btn-floating">
+                                <i class="fa fa-paperclip"></i>
+                            </button>
+                            <button class="btn btn-light btn-floating">
+                                <i class="fa fa-microphone"></i>
+                            </button>
+                            <button class="btn btn-primary btn-floating" type="submit">
+                                <i class="fa fa-send"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <!-- ./ chat -->
+    
+            <div class="sidebar-group">
+                <div id="contact-information" [ngClass]="isProfileShow ? 'sidebar active' : 'sidebar'">
+                    <header>
+                        <span>About</span>
+                        <ul class="list-inline">
+                            <li class="list-inline-item">
+                                <a class="btn btn-light sidebar-close">
+                                    <i class="ti-close" (click)="closeProfile()"></i>
+                                </a>
+                            </li>
+                        </ul>
+                    </header>
+                    <div class="sidebar-body">
+                        <div class="pl-4 pr-4 text-center">
+                            <!-- <figure class="avatar avatar-state-danger avatar-xl mb-4"> -->
+                            <figure class="avatar avatar-xl mb-4">
+                                <img src="./assets/dist/media/img/avataaars1.png" class="rounded-circle">
+                            </figure>
+                            <h5 class="text-primary" [innerText]="selectedUser?.firstname + ' ' + selectedUser?.lastname">Frans Hanscombe</h5>
+                            <p class="text-muted">Last seen: Today</p>
+                        </div>
+                        <hr>
+                        <div class="pl-4 pr-4">
                             <ul class="list-inline">
-                                <li class="list-inline-item">
-                                    <a>
-                                        <figure class="avatar avatar-lg">
-                                            <span class="avatar-title bg-warning">
-                                                <i class="fa fa-file-pdf-o"></i>
-                                            </span>
-                                        </figure>
+                                <li class="list-inline-item" data-toggle="tooltip">
+                                    <a class="btn btn-primary" data-toggle="modal" (click)="startConversation(selectedUser)">
+                                        <!-- <i class="fa fa-users"></i> -->
+                                        Message
                                     </a>
                                 </li>
                                 <li class="list-inline-item">
-                                    <a>
-                                        <figure class="avatar avatar-lg">
-                                            <img src="./assets/dist/media/img/avataaars1.png">
-                                        </figure>
+                                    <a class="btn btn-primary" data-toggle="tooltip">
+                                        Follow
+                                        <!-- <i class="ti-comment-alt"></i> -->
                                     </a>
                                 </li>
                                 <li class="list-inline-item">
-                                    <a>
-                                        <figure class="avatar avatar-lg">
-                                            <img src="./assets/dist/media/img/avataaars1.png">
-                                        </figure>
+                                    <a class="btn btn-danger" data-toggle="tooltip" title="">
+                                        Block
+                                        <!-- <i class="ti-comment-alt"></i> -->
+                                    </a>
+                                </li>
+                                
+                            </ul>
+                        </div>
+                        <hr>
+                        <div class="pl-4 pr-4">
+                            <h6>About</h6>
+                            <p class="text-muted">I love reading, traveling and discovering new things. You need to be happy
+                                in
+                                life.</p>
+                        </div>
+                        <hr>
+                        <div class="pl-4 pr-4">
+                            <h6>Phone</h6>
+                            <p class="text-muted">(555) 555 55 55</p>
+                        </div>
+                        <hr>
+                        <!-- <div class="pl-4 pr-4">
+                            <h6>Media</h6>
+                            <div class="files">
+                                <ul class="list-inline">
+                                    <li class="list-inline-item">
+                                        <a>
+                                            <figure class="avatar avatar-lg">
+                                                <span class="avatar-title bg-warning">
+                                                    <i class="fa fa-file-pdf-o"></i>
+                                                </span>
+                                            </figure>
+                                        </a>
+                                    </li>
+                                    <li class="list-inline-item">
+                                        <a>
+                                            <figure class="avatar avatar-lg">
+                                                <img src="./assets/dist/media/img/avataaars1.png">
+                                            </figure>
+                                        </a>
+                                    </li>
+                                    <li class="list-inline-item">
+                                        <a>
+                                            <figure class="avatar avatar-lg">
+                                                <img src="./assets/dist/media/img/avataaars1.png">
+                                            </figure>
+                                        </a>
+                                    </li>
+                                    <li class="list-inline-item">
+                                        <a>
+                                            <figure class="avatar avatar-lg">
+                                                <img src="./assets/dist/media/img/avataaars1.png">
+                                            </figure>
+                                        </a>
+                                    </li>
+                                    <li class="list-inline-item">
+                                        <a>
+                                            <figure class="avatar avatar-lg">
+                                                <span class="avatar-title bg-success">
+                                                    <i class="fa fa-file-excel-o"></i>
+                                                </span>
+                                            </figure>
+                                        </a>
+                                    </li>
+                                    <li class="list-inline-item">
+                                        <a>
+                                            <figure class="avatar avatar-lg">
+                                                <span class="avatar-title bg-info">
+                                                    <i class="fa fa-file-text-o"></i>
+                                                </span>
+                                            </figure>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div> -->
+                        <!-- <hr> -->
+                        <!-- <div class="pl-4 pr-4">
+                            <h6>City</h6>
+                            <p class="text-muted">Germany / Berlin</p>
+                        </div> -->
+                        <!-- <hr> -->
+                        <!-- <div class="pl-4 pr-4">
+                            <h6>Website</h6>
+                            <p>
+                                <a>www.franshanscombe.com</a>
+                            </p>
+                        </div> -->
+                        <!-- <hr> -->
+                        <div class="pl-4 pr-4">
+                            <h6>Social Links</h6>
+                            <ul class="list-inline social-links">
+                                <li class="list-inline-item">
+                                    <a class="btn btn-sm btn-floating btn-facebook">
+                                        <i class="fa fa-facebook"></i>
                                     </a>
                                 </li>
                                 <li class="list-inline-item">
-                                    <a>
-                                        <figure class="avatar avatar-lg">
-                                            <img src="./assets/dist/media/img/avataaars1.png">
-                                        </figure>
+                                    <a class="btn btn-sm btn-floating btn-twitter">
+                                        <i class="fa fa-twitter"></i>
                                     </a>
                                 </li>
                                 <li class="list-inline-item">
-                                    <a>
-                                        <figure class="avatar avatar-lg">
-                                            <span class="avatar-title bg-success">
-                                                <i class="fa fa-file-excel-o"></i>
-                                            </span>
-                                        </figure>
+                                    <a class="btn btn-sm btn-floating btn-dribbble">
+                                        <i class="fa fa-dribbble"></i>
+                                    </a>
+                                </li>
+                                <!-- <li class="list-inline-item">
+                                    <a class="btn btn-sm btn-floating btn-whatsapp">
+                                        <i class="fa fa-whatsapp"></i>
+                                    </a>
+                                </li> -->
+                                <li class="list-inline-item">
+                                    <a class="btn btn-sm btn-floating btn-linkedin">
+                                        <i class="fa fa-linkedin"></i>
                                     </a>
                                 </li>
                                 <li class="list-inline-item">
-                                    <a>
-                                        <figure class="avatar avatar-lg">
-                                            <span class="avatar-title bg-info">
-                                                <i class="fa fa-file-text-o"></i>
-                                            </span>
-                                        </figure>
+                                    <a class="btn btn-sm btn-floating btn-google">
+                                        <i class="fa fa-google"></i>
+                                    </a>
+                                </li>
+                                <!-- <li class="list-inline-item">
+                                    <a class="btn btn-sm btn-floating btn-behance">
+                                        <i class="fa fa-behance"></i>
+                                    </a>
+                                </li> -->
+                                <li class="list-inline-item">
+                                    <a class="btn btn-sm btn-floating btn-instagram">
+                                        <i class="fa fa-instagram"></i>
                                     </a>
                                 </li>
                             </ul>
                         </div>
-                    </div> -->
-                    <!-- <hr> -->
-                    <!-- <div class="pl-4 pr-4">
-                        <h6>City</h6>
-                        <p class="text-muted">Germany / Berlin</p>
-                    </div> -->
-                    <!-- <hr> -->
-                    <!-- <div class="pl-4 pr-4">
-                        <h6>Website</h6>
-                        <p>
-                            <a>www.franshanscombe.com</a>
-                        </p>
-                    </div> -->
-                    <!-- <hr> -->
-                    <div class="pl-4 pr-4">
-                        <h6>Social Links</h6>
-                        <ul class="list-inline social-links">
-                            <li class="list-inline-item">
-                                <a class="btn btn-sm btn-floating btn-facebook">
-                                    <i class="fa fa-facebook"></i>
-                                </a>
-                            </li>
-                            <li class="list-inline-item">
-                                <a class="btn btn-sm btn-floating btn-twitter">
-                                    <i class="fa fa-twitter"></i>
-                                </a>
-                            </li>
-                            <li class="list-inline-item">
-                                <a class="btn btn-sm btn-floating btn-dribbble">
-                                    <i class="fa fa-dribbble"></i>
-                                </a>
-                            </li>
-                            <!-- <li class="list-inline-item">
-                                <a class="btn btn-sm btn-floating btn-whatsapp">
-                                    <i class="fa fa-whatsapp"></i>
-                                </a>
-                            </li> -->
-                            <li class="list-inline-item">
-                                <a class="btn btn-sm btn-floating btn-linkedin">
-                                    <i class="fa fa-linkedin"></i>
-                                </a>
-                            </li>
-                            <li class="list-inline-item">
-                                <a class="btn btn-sm btn-floating btn-google">
-                                    <i class="fa fa-google"></i>
-                                </a>
-                            </li>
-                            <!-- <li class="list-inline-item">
-                                <a class="btn btn-sm btn-floating btn-behance">
-                                    <i class="fa fa-behance"></i>
-                                </a>
-                            </li> -->
-                            <li class="list-inline-item">
-                                <a class="btn btn-sm btn-floating btn-instagram">
-                                    <i class="fa fa-instagram"></i>
-                                </a>
-                            </li>
-                        </ul>
-                    </div>
-                    <hr>
-                    <div class="pl-4 pr-4">
-                        <div class="form-group">
-                            <div class="form-item custom-control custom-switch">
-                                <input type="checkbox" class="custom-control-input" id="customSwitch11">
-                                <label class="custom-control-label" for="customSwitch11">Block</label>
+                        <hr>
+                        <div class="pl-4 pr-4">
+                            <div class="form-group">
+                                <div class="form-item custom-control custom-switch">
+                                    <input type="checkbox" class="custom-control-input" id="customSwitch11">
+                                    <label class="custom-control-label" for="customSwitch11">Block</label>
+                                </div>
                             </div>
-                        </div>
-                        <div class="form-group">
-                            <div class="form-item custom-control custom-switch">
-                                <input type="checkbox" class="custom-control-input" checked="" id="customSwitch12">
-                                <label class="custom-control-label" for="customSwitch12">Mute</label>
+                            <div class="form-group">
+                                <div class="form-item custom-control custom-switch">
+                                    <input type="checkbox" class="custom-control-input" checked="" id="customSwitch12">
+                                    <label class="custom-control-label" for="customSwitch12">Mute</label>
+                                </div>
                             </div>
-                        </div>
-                        <div class="form-group">
-                            <div class="form-item custom-control custom-switch">
-                                <input type="checkbox" class="custom-control-input" id="customSwitch13">
-                                <label class="custom-control-label" for="customSwitch13">Get notification</label>
+                            <div class="form-group">
+                                <div class="form-item custom-control custom-switch">
+                                    <input type="checkbox" class="custom-control-input" id="customSwitch13">
+                                    <label class="custom-control-label" for="customSwitch13">Get notification</label>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+    
         </div>
-
+        <!-- ./ content -->
     </div>
-    <!-- ./ content -->
 </div>

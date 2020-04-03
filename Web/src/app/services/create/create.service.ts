@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { ToolService } from '../tool/tool.service';
-import { User, UserModel, Conversation, Participant, ConversationModel, Message } from 'src/app/models/model';
+import { User, UserModel, Conversation, Participant, ConversationModel, Message, Settings, Device, Avatar } from 'src/app/models/model';
 
 @Injectable({
   providedIn: 'root'
@@ -9,12 +9,31 @@ export class CreateService {
 
   constructor(private _tool: ToolService) { }
 
+  createSettingData(theme : boolean,alert : boolean,isPrivate : boolean){
+    return new Settings(theme,alert,isPrivate);
+  }
+
   createUserData(firstname: string, lastname: string, userCredential: firebase.auth.UserCredential): User {
+    const settings : Settings = this.createSettingData(false,true,true);
     let userId: string = userCredential.user.uid;
     let email : string = userCredential.user.email;
     let creationTime: number = parseInt(userCredential.user.metadata['b']);
-    let user: User = new User(userId, firstname, lastname,email, creationTime,[], false, true, false, null);
+    let user: User = new User(userId, firstname, lastname,email, creationTime, [], settings, true, false, null,null,null);
     return user;
+  }
+
+  createAvatarData(fileName : string,contentType : string, size : number,downloadUrl ?: string) : Avatar{
+    const avatar : Avatar = new Avatar(fileName,contentType,size,true,false,null,downloadUrl);
+    return avatar;
+    // return {
+    //   avatarName : fileName,
+    //   contentType : contentType,
+    //   size : size,
+    //   isActive : true,
+    //   isDeleted : false,
+    //   deletedTime : null,
+    //   downloadURL : downloadUrl
+    // }
   }
 
   createConversationData(conversationId : string,sender: User) : Conversation {

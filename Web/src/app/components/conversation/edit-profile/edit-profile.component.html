@@ -1,0 +1,216 @@
+
+<!-- edit profile modal -->
+<div class="modal fade" id="editProfileModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-zoom" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="ti-pencil"></i> Profile Edit
+                </h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <i class="ti-close"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <ul class="nav nav-tabs" role="tablist">
+                    <!-- <li class="nav-item">
+                        <a class="nav-link active" data-toggle="tab" href="#personal" role="tab" aria-controls="personal" aria-selected="true">Personal</a>
+                    </li> -->
+                    <li class="nav-item">
+                        <a class="nav-link active" data-toggle="tab" href="#about" role="tab" aria-controls="about" aria-selected="true">About</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-toggle="tab" href="#account" role="tab" aria-controls="account" aria-selected="false">Account</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-toggle="tab" href="#password" role="tab" aria-controls="password" aria-selected="false">Password</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-toggle="tab" href="#social-links" role="tab" aria-controls="social-links" aria-selected="false">Social Links</a>
+                    </li>
+                </ul>
+                <div class="tab-content">
+                    <div class="tab-pane show active" id="about" role="tabpanel">
+                        <form [formGroup]="profileForm" (ngSubmit)="onSubmit()">
+                            <div class="form-group">
+                                <label for="fullname" class="col-form-label">Firstname</label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">
+                                            <i class="ti-user"></i>
+                                        </span>
+                                    </div>
+                                    <input type="text" formControlName="firstname" class="form-control" id="firstname">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="fullname" class="col-form-label">Lastname</label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">
+                                            <i class="ti-user"></i>
+                                        </span>
+                                    </div>
+                                    <input type="text" formControlName="lastname"  class="form-control" id="lastname">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-form-label">Avatar</label>
+                                <div class="d-flex align-items-center">
+                                    <div *ngIf="base64">
+                                        <figure class="avatar mr-3 item-rtl">
+                                            <img [src]="base64" class="rounded-circle">
+                                        </figure>
+                                    </div>
+                                    <div class="custom-file">
+                                        <input type="file" (change)="onSelectFile($event)" formControlName="avatar" accept="image/x-png,image/jpg,image/jpeg" class="custom-file-input" id="customFile">
+                                        <input type="hidden" name="fileHidden" formControlName="imageValidator"/> <!-- Validation Field -->
+                                        <label class="custom-file-label" for="customFile">Choose file</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="about-text" class="col-form-label">Write a few words that describe you</label>
+                                <textarea class="form-control" formControlName="bio"  id="abouttext"></textarea>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="submit" class="btn btn-primary">Save</button>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="tab-pane" id="account" role="tabpanel">
+                        <div class="form-item custom-control custom-switch">
+                            <input type="checkbox" class="custom-control-input" [(ngModel)]="privacy" (ngModelChange)="changePrivacy(privacy)" id="privacySwitch"/>
+                            <label class="custom-control-label" for="privacySwitch">Profile Privacy</label>
+                        </div>
+                    </div>
+                    <div class="tab-pane" id="password" role="tabpanel">
+                        <form>
+                            <div class="form-group">
+                                <label for="fullname" class="col-form-label">Current Password</label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">
+                                            <i class="ti-user"></i>
+                                        </span>
+                                    </div>
+                                    <input type="password" class="form-control" id="currentPass">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="fullname" class="col-form-label">New Password</label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">
+                                            <i class="ti-user"></i>
+                                        </span>
+                                    </div>
+                                    <input type="password" class="form-control" id="newPass">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="fullname" class="col-form-label">New Password (Verify)</label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">
+                                            <i class="ti-user"></i>
+                                        </span>
+                                    </div>
+                                    <input type="password" class="form-control" id="verifyPass">
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="tab-pane" id="social-links" role="tabpanel">
+                        <form action="">
+                            <div class="form-group">
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                    <span class="input-group-text bg-facebook">
+                                        <i class="ti-facebook"></i>
+                                    </span>
+                                    </div>
+                                    <input type="text" class="form-control" placeholder="Username">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                    <span class="input-group-text bg-twitter">
+                                        <i class="ti-twitter"></i>
+                                    </span>
+                                    </div>
+                                    <input type="text" class="form-control" placeholder="Username">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                    <span class="input-group-text bg-instagram">
+                                        <i class="ti-instagram"></i>
+                                    </span>
+                                    </div>
+                                    <input type="text" class="form-control" placeholder="Username">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                    <span class="input-group-text bg-linkedin">
+                                        <i class="ti-linkedin"></i>
+                                    </span>
+                                    </div>
+                                    <input type="text" class="form-control" placeholder="Username">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                    <span class="input-group-text bg-dribbble">
+                                        <i class="ti-dribbble"></i>
+                                    </span>
+                                    </div>
+                                    <input type="text" class="form-control" placeholder="Username">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                    <span class="input-group-text bg-youtube">
+                                        <i class="ti-youtube"></i>
+                                    </span>
+                                    </div>
+                                    <input type="text" class="form-control" placeholder="Username">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                    <span class="input-group-text bg-google">
+                                        <i class="ti-google"></i>
+                                    </span>
+                                    </div>
+                                    <input type="text" class="form-control" placeholder="Username">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                    <span class="input-group-text bg-whatsapp">
+                                        <i class="fa fa-whatsapp"></i>
+                                    </span>
+                                    </div>
+                                    <input type="text" class="form-control" placeholder="Username">
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- ./ edit profile modal -->

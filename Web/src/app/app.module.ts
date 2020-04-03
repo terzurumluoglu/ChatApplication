@@ -1,14 +1,13 @@
 import { NgModule } from '@angular/core';
 import { AppComponent } from './app.component';
-import * as firebase from 'firebase/app';
-import "firebase/auth";
+import { AngularFireModule } from "angularfire2";
 import { firebaseConfig } from './helpers/firebase.config';
 import { MODULES, COMPONENTS, PROVIDERS } from './app.imports';
 import { HttpClientModule } from '@angular/common/http';
 import { ConversationModule } from './components/conversation/conversation.module';
-// import { ConversationModule } from './components/conversation/conversation.module';
-// import { ConversationModule } from './components/lounge/conversation/conversation.module';
-firebase.initializeApp(firebaseConfig);
+import { AngularFireAuthModule } from 'angularfire2/auth';
+import { AngularFirestoreModule } from 'angularfire2/firestore';
+import { AngularFireStorageModule } from 'angularfire2/storage';
 // ng generate module articles/articles --module app --flat --routing
 
 @NgModule({
@@ -17,9 +16,13 @@ firebase.initializeApp(firebaseConfig);
     // COMPONENTS,
   ],
   imports: [
+    AngularFireModule.initializeApp(firebaseConfig),
     MODULES,
     HttpClientModule,
-    ConversationModule
+    ConversationModule,
+    AngularFireAuthModule,
+    AngularFirestoreModule,
+    AngularFireStorageModule
   ],
   providers: [
     PROVIDERS,

@@ -1,18 +1,18 @@
 import { Pipe, PipeTransform } from '@angular/core';
 import { User, Participant } from 'src/app/models/model';
-import { AuthenticationService } from 'src/app/services/authentication/authentication.service';
+import { AuthService } from 'src/app/services/firebase/auth/auth.service';
 
 @Pipe({
   name: 'participant'
 })
 export class ParticipantPipe implements PipeTransform {
 
-  constructor(private _authentication : AuthenticationService){}
+  constructor(private _auth : AuthService){}
 
   transform(data: Participant[]): any {
-    const currentUser : User = this._authentication.currentUserValue;
+    const currentUserId : string = this._auth.getCurrentUserId();
     try {
-      const user: User = data.find(p => p.user.userId != currentUser.userId).user;
+      const user: User = data.find(p => p.user.userId != currentUserId).user;
       return user.firstname + ' ' + user.lastname;
     } catch (error) {
       return '';

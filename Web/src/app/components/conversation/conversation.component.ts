@@ -1,9 +1,10 @@
 import { Component, OnInit, HostBinding, ViewChild, ElementRef } from '@angular/core';
 import { UserModel, User, ConversationModel, Conversation, Participant, Message } from 'src/app/models/model';
-import { AuthenticationService } from 'src/app/services/authentication/authentication.service';
 import { DatabaseService } from 'src/app/services/firebase/database/database.service';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { LocalService } from 'src/app/services/local/local.service';
+import { AuthService } from 'src/app/services/firebase/auth/auth.service';
+import {  } from "angularfire2/auth";
 
 @Component({
   selector: 'app-conversation',
@@ -17,47 +18,69 @@ export class ConversationComponent implements OnInit {
   userModel: UserModel;
   users: User[];
   conversations: ConversationModel[] = [];
+  hasConversation: boolean = true;
   participant: User;
   selectedConversation: ConversationModel;
   selectedUser: User;
   messageForm: FormGroup;
   cons: Conversation[];
-  currentUser: User;
+  currentUserId: string;
   isProfileShow: boolean = false;
+  theme: boolean = false
+  notify: boolean = false;
+
+  public userSubs : any;
+  public conversationSubs : any;
+  public participantSubs : any;
+  public messagesSubs : any;
 
   constructor(
     private formBuilder: FormBuilder,
-    private _authentication: AuthenticationService,
+    private _auth: AuthService,
     private _db: DatabaseService,
     private _local: LocalService
   ) {
     this.main();
   }
 
+  changeTheme(selectedTheme: boolean) {
+    this.theme = selectedTheme;
+    this._db.updateUserDataByUserId(this.currentUserId, 'settings.darkTheme', selectedTheme).then(() => {
+      // Success
+    }).catch(e => {
+      // Fail
+      this.theme = !selectedTheme;
+    });
+  }
+
+  changeNotify(selectedNotify: boolean) {
+    this.notify = selectedNotify;
+    this._db.updateUserDataByUserId(this.currentUserId, 'settings.notify', selectedNotify).then(() => {
+      // Success
+    }).catch(e => {
+      // Fail
+      this.notify = !selectedNotify;
+    });
+  }
+
   ngOnInit(): void {
   }
 
+  unsubscription(event: any) {
+    console.log(event);
+  }
   main() {
-    this.currentUser = this._authentication.currentUserValue;
-    if (localStorage.getItem('userModel')) {
       this.userModel = JSON.parse(localStorage.getItem('userModel'));
+      this.currentUserId = this.userModel.user.userId;
+      this.getUser();
       this.getConversations().then(() => {
-        this.userModel.user = this.currentUser;
         for (let i = 0; i < this.conversations.length; i++) {
           this.userModel.conversations[i] = this.conversations[i];
         }
       });
-    }
-    else {
-      this.getConversations().then(() => {
-        this.userModel = new UserModel(this.currentUser, this.conversations);
-      });
-    }
-    this.createForm();
-    // this.getConversations().then(() => {
-    //   this.userModel = new UserModel(this.currentUser, this.conversations);
-    // });
-    this.getAllUsers();
+      this.createForm();
+      this.getAllUsers();
+
   }
 
   // FORM
@@ -77,8 +100,8 @@ export class ConversationComponent implements OnInit {
     } else {
       const m: string = this.f.message.value;
       this.messageForm.reset();
-      const receiver: User = this.selectedConversation.participants.find(p => p.user.userId != this.currentUser.userId).user;
-      this._db.sendMessage(m, this.selectedConversation, this.currentUser, receiver).then(() => {
+      const receiver: User = this.selectedConversation.participants.find(p => p.user.userId != this.currentUserId).user;
+      this._db.sendMessage(m, this.selectedConversation, this.userModel.user, receiver).then(() => {
         console.log('Message was sent succesfully');
       }).catch(e => {
         this.messageForm.controls.name.setValue(m);
@@ -88,8 +111,10 @@ export class ConversationComponent implements OnInit {
   }
 
   async getConversations() {
-    this._db.getConversations(this.currentUser).onSnapshot(snap => {
-      this.cons = snap.docs.map((doc: any) => doc.data()) as Conversation[];
+    this.conversationSubs = this._db.getConversations(this.currentUserId).valueChanges().subscribe(snap => {
+      this.cons = snap.map((doc: any) => doc.data()) as Conversation[];
+      this.hasConversation = this.cons.length == 0 ? false : true;
+      // if (this.cons.length == 0) { localStorage.setItem('userModel', JSON.stringify(this.userModel)); }
       for (let i = 0; i < this.cons.length; i++) {
         const conversation = new Conversation(this.cons[i].conversationId, this.cons[i].createdTime, this.cons[i].owner, this.cons[i].deletedTime, this.cons[i].isActive, this.cons[i].isDeleted, this.cons[i].title);
         const conversationModel = new ConversationModel(conversation, null, null);
@@ -100,7 +125,7 @@ export class ConversationComponent implements OnInit {
         else {
           cm.conversation = conversationModel.conversation;
         }
-        this.change(1, i, conversationModel.conversation);
+        this.change(1, conversationModel.conversation, i);
       }
       this.getParticipants();
       this.getMessages();
@@ -109,32 +134,43 @@ export class ConversationComponent implements OnInit {
 
   getParticipants() {
     for (let i = 0; i < this.cons.length; i++) {
-      this._db.getParticipants(this.currentUser, this.cons[i].conversationId).onSnapshot(snapshot => {
-        const parts: Participant[] = snapshot.docs.map((doc: any) => doc.data());
+      this.participantSubs = this._db.getParticipants(this.currentUserId, this.cons[i].conversationId).valueChanges().subscribe(snapshot => {
+        const parts: Participant[] = snapshot.map((doc: any) => doc.data());
         this.conversations[i].participants = parts;
-        this.change(2, i, parts);
+        this.change(2, parts, i);
       });
     }
   }
 
   getMessages() {
     for (let i = 0; i < this.cons.length; i++) {
-      this._db.getMessages(this.currentUser, this.cons[i].conversationId).onSnapshot(snapshot => {
-        const messages: Message[] = snapshot.docs.map((doc: any) => doc.data());
+      this.messagesSubs = this._db.getMessages(this.currentUserId, this.cons[i].conversationId).valueChanges().subscribe(snapshot => {
+        const messages: Message[] = snapshot.map((doc: any) => doc.data());
         this.conversations[i].messages = messages;
         this.scrollToBottom();
-        this.change(3, i, messages);
+        this.change(3, messages, i);
       });
     }
   }
 
-  change(type: number, index: number, data: any) {
+  getUser() {
+    this.userSubs = this._db.getUser(this.userModel.user.userId).valueChanges().subscribe(snap => {
+      this.theme = this.userModel.user.settings.darkTheme;
+      this.notify = this.userModel.user.settings.notify;
+      this.change(4, snap);
+    })
+  }
+
+  change(type: number, data: any, index?: number) {
     if (type === 1) {
       this.userModel.conversations[index].conversation = data;
     } else if (type === 2) {
       this.userModel.conversations[index].participants = data;
-    } else {
+    } else if (type === 3) {
       this.userModel.conversations[index].messages = data;
+    }
+    else {
+      this.userModel.user = data;
     }
     localStorage.setItem('userModel', JSON.stringify(this.userModel));
   }
@@ -156,19 +192,18 @@ export class ConversationComponent implements OnInit {
   }
 
   async getAllUsers() {
-    this.users = await this._db.getAllUsers(this.currentUser.userId);
+    this.users = await this._db.getAllUsers(this.currentUserId);
   }
 
   //RIGHT
   startConversation(selectedUser: User) {
     const con: ConversationModel = this._local.getConversation(selectedUser);
     if (con === null) {
-      this.selectedConversation = this._db.startConversation(this.currentUser, selectedUser);
+      this.selectedConversation = this._db.startConversation(this.userModel.user, selectedUser);
     } else {
       this.selectedConversation = con;
     }
   }
-
 
   scrollToBottom(): void {
     setTimeout(() => {
@@ -178,7 +213,7 @@ export class ConversationComponent implements OnInit {
           this.myScrollContainer.nativeElement.scrollTop = this.pageHeight;
         }
       } catch (err) {
-        console.log('111111111111');
+        // console.log('111111111111');
       }
     }, 250);
   }

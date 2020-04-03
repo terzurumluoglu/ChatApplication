@@ -23,3 +23,50 @@
     -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,.3);
     background-color: #cdcdcd;
 }
+
+.dark #style-1::-webkit-scrollbar-track
+{
+    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+    border-radius: 10px;
+    background-color: #464852;
+}
+
+.dark #style-1::-webkit-scrollbar
+{
+    width: 8px;
+    background-color: #272935;
+}
+
+.dark #style-1::-webkit-scrollbar-thumb
+{
+    border-radius: 10px;
+    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,.3);
+    background-color: #2d5245;
+}
+
+.last-message{
+    color : #646464;
+}
+
+.dark .last-message{
+    color : #ff7373 !important;
+}
+
+.deneme{
+    height: 50px;
+    margin-left: 10px;
+    margin-right: 10px;
+    padding: 15px;
+    text-align: center;
+    font-size: 16px;
+    color: #fff;
+    border-radius: 4px;
+    background-color: #3db16b;
+}
+
+.delete{
+    color : #dc3545;
+}
+.delete:hover{
+    color : #dc3545;
+}

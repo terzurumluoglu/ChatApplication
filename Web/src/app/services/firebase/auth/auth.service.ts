@@ -1,44 +1,50 @@
 import { Injectable } from '@angular/core';
-import * as firebase from "firebase";
-import { ErrorInterceptor } from 'src/app/helpers/error.interceptor';
 import { DatabaseService } from '../database/database.service';
-import { User } from 'src/app/models/model';
 import { FunctionsService } from '../functions/functions.service';
+import { AngularFireAuth } from "angularfire2/auth";
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
 
-  fireAuth = firebase.auth();
 
+  currentUser: firebase.User;
+  
   constructor(
-    private _db : DatabaseService,
-    private _functions : FunctionsService
-    ) { }
-
-
-  getCurrentUser(): Promise<any> {
-    return new Promise((res, rej) => {
-      firebase.auth().onAuthStateChanged(user => {
-        res(user);
-      });
+    private angularFireAuth : AngularFireAuth,
+    private _db: DatabaseService,
+  ) {
+    angularFireAuth.authState.subscribe(user => {
+      if (user) {
+        localStorage.setItem('userId',user.uid);
+      } else {
+        localStorage.setItem('userId',null);
+      }
     })
   }
 
+  getCurrentUserId(){
+    return localStorage.getItem('userId') ?? null;
+  }
+
+  get isLoggedIn() : boolean{
+    return this.getCurrentUserId() !== null;
+  }
+
   forgotPassword(email: string) {
-    return this.fireAuth.sendPasswordResetEmail(email);
+    return this.angularFireAuth.auth.sendPasswordResetEmail(email);
   }
 
   createUserWithEmailAndPassword(email: string, password: string) {
-    return this.fireAuth.createUserWithEmailAndPassword(email,password);
+    return this.angularFireAuth.auth.createUserWithEmailAndPassword(email, password);
   }
 
-  signInWithEmailAndPassword(email: string, password: string) : Promise<firebase.auth.UserCredential>{
-    return this.fireAuth.signInWithEmailAndPassword(email,password);
+  signInWithEmailAndPassword(email: string, password: string): Promise<firebase.auth.UserCredential> {
+    return this.angularFireAuth.auth.signInWithEmailAndPassword(email, password);
   }
 
   signOut() {
-    return this.fireAuth.signOut();
+    return this.angularFireAuth.auth.signOut();
   }
 }

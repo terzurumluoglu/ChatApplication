@@ -2,9 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AuthService } from 'src/app/services/firebase/auth/auth.service';
 import { DatabaseService } from 'src/app/services/firebase/database/database.service';
-import { AuthenticationService } from 'src/app/services/authentication/authentication.service';
 import { Router } from '@angular/router';
 import { ErrorInterceptor } from 'src/app/helpers/error.interceptor';
+import { User, UserModel } from 'src/app/models/model';
 
 @Component({
   selector: 'app-login',
@@ -13,20 +13,16 @@ import { ErrorInterceptor } from 'src/app/helpers/error.interceptor';
 })
 export class LoginComponent implements OnInit {
 
-  title : string = 'Sign In';
+  title: string = 'Sign In';
   loginForm: FormGroup;
   constructor(
     private formBuilder: FormBuilder,
-    private router : Router,
-    private _auth : AuthService,
-    private _authentication : AuthenticationService,
-    private _db : DatabaseService,
-    private _error : ErrorInterceptor
-    ) {
+    private router: Router,
+    private _auth: AuthService,
+    private _db: DatabaseService,
+    private _error: ErrorInterceptor
+  ) {
     this.createForm();
-    if (this._authentication.currentUserValue) {
-      this.router.navigate(['/conversation']);
-    }
   }
 
   ngOnInit(): void {
@@ -34,19 +30,17 @@ export class LoginComponent implements OnInit {
 
   get f() { return this.loginForm.controls; }
 
-  async onSubmit() {
-    try {
-      const credential : firebase.auth.UserCredential = await this._auth.signInWithEmailAndPassword(this.f.email.value,this.f.password.value);
-      try {
-        const user = await this._db.logIn(credential.user.uid);
-        this._authentication.saveUser(user);
+  onSubmit() {
+    this._auth.signInWithEmailAndPassword(this.f.email.value, this.f.password.value).then(credential => {
+      console.log(credential);
+      this._db.getUser(credential.user.uid).get().subscribe((user) => {
+        localStorage.setItem('userModel', JSON.stringify(new UserModel(user.data() as User, [])));
+        console.log(user.data());
         this.router.navigate(['/conversation']);
-      } catch (er) {
-        this._error.handleError(er);
-      }
-    } catch (error) {
-      this._error.handleError(error);
-    }
+      })
+    }).catch(e => {
+      this._error.handleError(e);
+    });
   }
 
   createForm() {
@@ -55,5 +49,4 @@ export class LoginComponent implements OnInit {
       password: ['', Validators.required]
     });
   }
-
 }

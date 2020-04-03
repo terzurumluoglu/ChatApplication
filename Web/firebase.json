@@ -1,0 +1,11 @@
+{
+  "hosting": {
+    "public": "dist/ChatApplication",
+    "site":"toprakchatapplication",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ]
+  }
+}

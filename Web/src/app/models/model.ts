@@ -1,30 +1,67 @@
 export class User {
     userId: string;
     firstname: string;
-    lastname: string
+    lastname: string;
     email : string;
     creationTime: number;
     devices : Device[];
-    isPrivate: boolean;
+    settings : Settings;
     isActive: boolean;
     isDeleted: boolean;
     deletedTime: number;
-    constructor(userId: string, firstname: string, lastname: string,email : string, creationTime: number,devices : Device[], isPrivate: boolean, isActive: boolean, isDeleted: boolean, deletedTime: number) {
+    avatar : Avatar;
+    bio : string
+    constructor(userId: string, firstname: string, lastname: string,email : string, creationTime: number,devices : Device[],settings : Settings, isActive: boolean, isDeleted: boolean, deletedTime: number,avatar : Avatar,bio : string) {
         this.userId = userId;
         this.firstname = firstname;
         this.lastname = lastname;
         this.email = email;
         this.creationTime = creationTime;
         this.devices = devices;
-        this.isPrivate = isPrivate;
+        this.settings = settings;
         this.isActive = isActive;
         this.isDeleted = isDeleted;
         this.deletedTime = deletedTime;
+        this.avatar = avatar;
+        this.bio = bio;
     }
 }
 
 export class Device {
     token: string;
+    constructor(token ?: string){
+        this.token = token;
+    }
+}
+
+export class Settings{
+    darkTheme : boolean;
+    notify : boolean;
+    isPrivate : boolean
+    constructor(darkTheme : boolean,notify : boolean,isPrivate : boolean){
+        this.darkTheme = darkTheme;
+        this.notify = notify;
+        this.isPrivate = isPrivate;
+    }
+}
+
+export class Avatar{
+    avatarName : string;
+    contentType : string;
+    size : number;
+    isActive : boolean;
+    isDeleted : boolean;
+    deletedTime : number;
+    downloadURL ?: string;
+    constructor(avatarName : string,contentType : string,size : number,isActive : boolean,isDeleted : boolean,deletedTime : number,downloadURL ?: string){
+        this.avatarName = avatarName
+        this.contentType = contentType;
+        this.size = size
+        this.isActive = isActive;
+        this.isDeleted = isDeleted
+        this.deletedTime = deletedTime;
+        this.downloadURL = downloadURL;
+    }
 }
 
 export class Conversation {
@@ -108,7 +145,6 @@ export class ConversationModel {
 export class UserModel {
     user: User;
     conversations: ConversationModel[];
-    devices: Device[];
     follower: User[];
     following: User[];
     constructor(user : User, conversations : ConversationModel[]) {
@@ -116,3 +152,12 @@ export class UserModel {
         this.conversations = conversations;
     }
 }
+
+export class Update {
+    key : string;
+    value : any;
+    constructor(key : string, value : any) {
+      this.key = key;
+      this.value = value;
+    }
+  }
