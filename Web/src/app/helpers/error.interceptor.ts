@@ -23,8 +23,4 @@ export class ErrorInterceptor implements HttpInterceptor {
         catchError(this.handleError)
       )
   }
-  
-  success(title : string,message : string) {
-    this._toast.success(title,message);
-  }
 }

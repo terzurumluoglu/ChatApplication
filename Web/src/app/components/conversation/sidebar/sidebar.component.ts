@@ -22,10 +22,10 @@ export class SidebarComponent implements OnInit {
 
   logout() {
     this.unsubscribe.emit(true);
-    // this._auth.signOut().then(() => {
-    //   this.router.navigate(['/home/login']);
-    // }).catch(e => {
-    //   this._error.handleError(e);
-    // });
+    this._auth.signOut().then(() => {
+      this.router.navigate(['/home/login']);
+    }).catch(e => {
+      this._error.handleError(e);
+    });
   }
 }

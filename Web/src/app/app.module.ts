@@ -8,6 +8,7 @@ import { ConversationModule } from './components/conversation/conversation.modul
 import { AngularFireAuthModule } from 'angularfire2/auth';
 import { AngularFirestoreModule } from 'angularfire2/firestore';
 import { AngularFireStorageModule } from 'angularfire2/storage';
+import * as firebase from 'firebase/app';
 // ng generate module articles/articles --module app --flat --routing
 
 @NgModule({
@@ -16,13 +17,14 @@ import { AngularFireStorageModule } from 'angularfire2/storage';
     // COMPONENTS,
   ],
   imports: [
-    AngularFireModule.initializeApp(firebaseConfig),
     MODULES,
-    HttpClientModule,
-    ConversationModule,
+    AngularFireModule.initializeApp(firebaseConfig),
+    AngularFirestoreModule.enablePersistence(),
     AngularFireAuthModule,
     AngularFirestoreModule,
-    AngularFireStorageModule
+    AngularFireStorageModule,
+    HttpClientModule,
+    ConversationModule
   ],
   providers: [
     PROVIDERS,

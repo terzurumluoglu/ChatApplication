@@ -4,7 +4,7 @@ import { DatabaseService } from 'src/app/services/firebase/database/database.ser
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { LocalService } from 'src/app/services/local/local.service';
 import { AuthService } from 'src/app/services/firebase/auth/auth.service';
-import {  } from "angularfire2/auth";
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-conversation',
@@ -29,10 +29,10 @@ export class ConversationComponent implements OnInit {
   theme: boolean = false
   notify: boolean = false;
 
-  public userSubs : any;
-  public conversationSubs : any;
-  public participantSubs : any;
-  public messagesSubs : any;
+  public userSubs: Subscription;
+  public conversationSubs: Subscription;
+  public participantSubs: Subscription;
+  public messagesSubs: Subscription;
 
   constructor(
     private formBuilder: FormBuilder,
@@ -44,11 +44,13 @@ export class ConversationComponent implements OnInit {
   }
 
   changeTheme(selectedTheme: boolean) {
+    console.log(selectedTheme);
+
     this.theme = selectedTheme;
     this._db.updateUserDataByUserId(this.currentUserId, 'settings.darkTheme', selectedTheme).then(() => {
       // Success
     }).catch(e => {
-      // Fail
+      // Fail      
       this.theme = !selectedTheme;
     });
   }
@@ -67,20 +69,25 @@ export class ConversationComponent implements OnInit {
   }
 
   unsubscription(event: any) {
-    console.log(event);
+    if (this.userSubs) { this.userSubs.unsubscribe(); }
+    if (this.conversationSubs) { this.conversationSubs.unsubscribe(); }
+    if (this.participantSubs) { this.participantSubs.unsubscribe(); }
+    if (this.messagesSubs) { this.messagesSubs.unsubscribe(); }
   }
-  main() {
-      this.userModel = JSON.parse(localStorage.getItem('userModel'));
-      this.currentUserId = this.userModel.user.userId;
-      this.getUser();
-      this.getConversations().then(() => {
-        for (let i = 0; i < this.conversations.length; i++) {
-          this.userModel.conversations[i] = this.conversations[i];
-        }
-      });
-      this.createForm();
-      this.getAllUsers();
 
+  main() {
+    this.userModel = JSON.parse(localStorage.getItem('userModel'));
+    this.currentUserId = this.userModel.user.userId;
+    this.theme = this.userModel.user.settings.darkTheme;
+    this.notify = this.userModel.user.settings.notify;
+    this.getUser();
+    this.getConversations().then(() => {
+      for (let i = 0; i < this.conversations.length; i++) {
+        this.userModel.conversations[i] = this.conversations[i];
+      }
+    });
+    this.createForm();
+    this.getAllUsers();
   }
 
   // FORM
@@ -155,8 +162,8 @@ export class ConversationComponent implements OnInit {
 
   getUser() {
     this.userSubs = this._db.getUser(this.userModel.user.userId).valueChanges().subscribe(snap => {
-      this.theme = this.userModel.user.settings.darkTheme;
-      this.notify = this.userModel.user.settings.notify;
+      // this.theme = this.userModel.user.settings.darkTheme;
+      // this.notify = this.userModel.user.settings.notify;
       this.change(4, snap);
     })
   }
@@ -168,8 +175,7 @@ export class ConversationComponent implements OnInit {
       this.userModel.conversations[index].participants = data;
     } else if (type === 3) {
       this.userModel.conversations[index].messages = data;
-    }
-    else {
+    } else {
       this.userModel.user = data;
     }
     localStorage.setItem('userModel', JSON.stringify(this.userModel));

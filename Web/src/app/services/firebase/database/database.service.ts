@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import * as firebase from "firebase";
-// import 'firebase/firestore';
+import * as firebase from "firebase/app";
+import 'firebase/firestore';
 import { ToolService } from '../../tool/tool.service';
 import { CreateService } from '../../create/create.service';
 import { User, UserModel, Device, Conversation, Participant, ConversationModel, Message, Settings, Avatar } from 'src/app/models/model';
@@ -11,9 +11,9 @@ import { AngularFirestore } from "angularfire2/firestore";
 })
 export class DatabaseService {
 
-  // firestore = firebase.firestore();
-  // userRef = this.firestore.collection('users');
-  userRef : any = firebase.firestore().collection('users');
+  firestore = firebase.firestore();
+  userRef = this.firestore.collection('users');
+  // userRef : any = firebase.firestore().collection('users');
   userModel: UserModel;
   constructor(
     private angularFirestore : AngularFirestore,

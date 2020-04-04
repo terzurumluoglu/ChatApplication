@@ -4,6 +4,7 @@ import { ErrorInterceptor } from 'src/app/helpers/error.interceptor';
 import { DatabaseService } from 'src/app/services/firebase/database/database.service';
 import { AuthService } from 'src/app/services/firebase/auth/auth.service';
 import { Router } from '@angular/router';
+import { User, UserModel } from 'src/app/models/model';
 
 @Component({
   selector: 'app-register',
@@ -31,8 +32,11 @@ export class RegisterComponent implements OnInit {
 
   onSubmit() {
     this._auth.createUserWithEmailAndPassword(this.f.email.value,this.f.password.value).then(credential => {
-      this._db.addUser(this.f.firstname.value, this.f.lastname.value, credential);
-      this.router.navigate(['/conversation']);
+      this._db.addUser(this.f.firstname.value, this.f.lastname.value, credential).then((user : User) => {
+        let userModel : UserModel = new UserModel(user,[]);
+        localStorage.setItem('userModel',JSON.stringify(userModel));
+        this.router.navigate(['/conversation']);
+      });
     }).catch(e => {
       this._error.handleError(e);
     })

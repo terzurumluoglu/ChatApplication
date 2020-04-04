@@ -33,9 +33,10 @@ export class LoginComponent implements OnInit {
   onSubmit() {
     this._auth.signInWithEmailAndPassword(this.f.email.value, this.f.password.value).then(credential => {
       console.log(credential);
-      this._db.getUser(credential.user.uid).get().subscribe((user) => {
-        localStorage.setItem('userModel', JSON.stringify(new UserModel(user.data() as User, [])));
+      this._db.getUser(credential.user.uid).get()
+      .subscribe((user) => {
         console.log(user.data());
+        localStorage.setItem('userModel', JSON.stringify(new UserModel(user.data() as User, [])));
         this.router.navigate(['/conversation']);
       })
     }).catch(e => {

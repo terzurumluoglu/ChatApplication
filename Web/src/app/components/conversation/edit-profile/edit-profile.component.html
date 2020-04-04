@@ -31,7 +31,7 @@
                 </ul>
                 <div class="tab-content">
                     <div class="tab-pane show active" id="about" role="tabpanel">
-                        <form [formGroup]="profileForm" (ngSubmit)="onSubmit()">
+                        <form [formGroup]="profileForm">
                             <div class="form-group">
                                 <label for="fullname" class="col-form-label">Firstname</label>
                                 <div class="input-group">
@@ -74,7 +74,7 @@
                                 <textarea class="form-control" formControlName="bio"  id="abouttext"></textarea>
                             </div>
                             <div class="modal-footer">
-                                <button type="submit" class="btn btn-primary">Save</button>
+                                <button type="submit" class="btn btn-primary" data-dismiss="modal" (click)='onSubmit()'>Save</button>
                             </div>
                         </form>
                     </div>
@@ -207,9 +207,9 @@
                     </div>
                 </div>
             </div>
-            <div class="modal-footer">
+            <!-- <div class="modal-footer">
                 <button type="button" class="btn btn-primary">Save</button>
-            </div>
+            </div> -->
         </div>
     </div>
 </div>

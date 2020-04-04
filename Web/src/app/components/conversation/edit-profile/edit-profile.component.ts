@@ -4,7 +4,7 @@ import { FormBuilder, Validators, FormGroup } from '@angular/forms';
 import { DatabaseService } from 'src/app/services/firebase/database/database.service';
 import { StorageService } from 'src/app/services/firebase/storage/storage.service';
 import { ErrorInterceptor } from 'src/app/helpers/error.interceptor';
-import { AuthService } from 'src/app/services/firebase/auth/auth.service';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-edit-profile',
@@ -22,10 +22,10 @@ export class EditProfileComponent implements OnInit {
   constructor(
     private cd: ChangeDetectorRef,
     private formBuilder: FormBuilder,
-    private _auth : AuthService,
     private _db: DatabaseService,
     private _error : ErrorInterceptor,
-    private _storage : StorageService
+    private _storage : StorageService,
+    private _taost : ToastrService
   ) {
     this.main();
   }
@@ -35,7 +35,7 @@ export class EditProfileComponent implements OnInit {
     this.userModel = JSON.parse(localStorage.getItem('userModel'));
     this.currentUserId = this.userModel.user.userId;
     this.privacy = this.userModel.user.settings.isPrivate;
-    this.base64 = this.userModel.user.avatar.downloadURL;
+    this.base64 = this.userModel.user.avatar ? this.userModel.user.avatar.downloadURL : null;
     this.createForm();
   }
   
@@ -83,33 +83,36 @@ export class EditProfileComponent implements OnInit {
 
   onSubmit() {
     const datas : Update[] = this.createUpdateList();
+    
     datas.forEach(element => {
+      this._taost.info('Loading...','Profile updating...');
       if (element.key == 'avatar') {
         this._storage.saveAvatar(this.currentUserId,element.value,'personal').then(() => {
-          this._error.success('Success','Your Profile was updated');
+          this._taost.success('Success','Your Profile was updated');
         }).catch(e => {
           this._error.handleError(e);
         });
       }
       else{
         this._db.updateUserDataByUserId(this.currentUserId,element.key,element.value).then(() => {
-          this._error.success('Success','Your Profile was updated');
+          this._taost.success('Success','Your Profile was updated');
+          // this.userModel.user[element.key] = element.value;
         }).catch(e => {
           this._error.handleError(e);
         });;
       }
+      this.userModel = JSON.parse(localStorage.getItem('userModel'));
     });
   }
 
   createUpdateList() : Update[]{
     
     const datas : Update[] = [];
-
-    if (this.f.firstname && this.f.firstname.value != this.userModel.user.firstname) {
+    if (this.f.firstname) {
       const data : Update = new Update('firstname',this.f.firstname.value);
       datas.push(data);
     }
-    if (this.f.lastname.valid && this.f.lastname.value != this.userModel.user.lastname) {
+    if (this.f.lastname.valid) {
       const data : Update = new Update('lastname',this.f.lastname.value);
       datas.push(data);
     }
@@ -117,7 +120,7 @@ export class EditProfileComponent implements OnInit {
       const data : Update = new Update('avatar',this.selectedFile);
       datas.push(data);
     }
-    if (this.f.bio.value != this.userModel.user.bio) {
+    if (this.f.bio.valid) {
       const data : Update = new Update('bio',this.f.bio.value);
       datas.push(data);
     }

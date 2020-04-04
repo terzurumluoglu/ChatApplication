@@ -1,17 +1,16 @@
 import { Injectable } from '@angular/core';
-// import * as firebase from "firebase";
-// import 'firebase/storage';
 import { ToolService } from '../../tool/tool.service';
 import { DatabaseService } from '../database/database.service';
-import { AngularFireStorage } from "angularfire2/storage";
-
+import { AngularFireStorage, AngularFireStorageReference } from "angularfire2/storage";
+import * as firebase from "firebase/app";
+import 'firebase/storage';
 @Injectable({
   providedIn: 'root'
 })
 export class StorageService {
 
   appName: 'ChatApplication';
-  // storage = firebase.storage();
+  ref : AngularFireStorageReference = this.angularFireStorage.ref(this.appName);
   constructor(
     private angularFireStorage : AngularFireStorage,
     private _db: DatabaseService,
@@ -22,9 +21,7 @@ export class StorageService {
     const ext: string = file.type.split('/')[1];
     const fileName: string = this._tool.getTime().toString() + '.' + ext;
     return new Promise((res,rej) => {
-      this.angularFireStorage.ref(this.appName)
-      .child(privacy).child(uid).child(fileName)
-      .put(file, { contentType: file.type }).then(() => {
+      this.ref.child(privacy).child(uid).child(fileName).put(file, { contentType: file.type }).then(() => {
         this.getPhotoUrl(uid,privacy, fileName).then(downloadURL => {
           this._db.addAvatar(uid, file, fileName, file.type, downloadURL).then(() => {
             res(null);
@@ -42,7 +39,7 @@ export class StorageService {
 
   getPhotoUrl(uid:string,privacy: string, fileName: string): Promise<string> {
     return new Promise((res, rej) => {
-      this.angularFireStorage.ref(this.appName).child(privacy).child(uid).child(fileName).getDownloadURL().then(p => {
+      this.ref.child(privacy).child(uid).child(fileName).getDownloadURL().then(p => {
         res(p);
       }).catch(err => {
         rej(err)
