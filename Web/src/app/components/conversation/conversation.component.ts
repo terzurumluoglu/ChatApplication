@@ -28,6 +28,7 @@ export class ConversationComponent implements OnInit {
   isProfileShow: boolean = false;
   theme: boolean = false
   notify: boolean = false;
+  emptyAvatar: string = './assets/dist/media/img/empty-avatar.png';
 
   public userSubs: Subscription;
   public conversationSubs: Subscription;
