@@ -153,7 +153,7 @@
                             <li class="list-group-item" *ngFor="let u of users" (click)="selectUser(u)">
                                 <div>
                                     <figure class="avatar">
-                                        <img src="./assets/dist/media/img/avataaars1.png" class="rounded-circle">
+                                        <img [src]="u?.avatar?.downloadURL" class="rounded-circle">
                                     </figure>
                                 </div>
                                 <div class="users-list-body">
