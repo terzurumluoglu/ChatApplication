@@ -154,6 +154,7 @@ export class DatabaseService {
       datas[i].participants.forEach(element => {
         let partRef = conRef.doc(conKey).collection('participants');
         let partKey = partRef.doc().id;
+        element.conversationId = conKey;
         element.participantId = partKey;
         partRef.doc(partKey).set(Object.assign({}, element));
       });

@@ -8,6 +8,7 @@ import { LastDataPipe } from 'src/app/pipes/lastData/last-data.pipe';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { ParticipantPipe } from 'src/app/pipes/participant/participant.pipe';
 import { EditProfileComponent } from './edit-profile/edit-profile.component';
+import { ConversationsHasMessagePipe } from 'src/app/pipes/conversations-has-message/conversations-has-message.pipe';
 
 @NgModule({
   declarations: [
@@ -15,7 +16,8 @@ import { EditProfileComponent } from './edit-profile/edit-profile.component';
     SidebarComponent,
     LastDataPipe,
     ParticipantPipe,
-    EditProfileComponent
+    EditProfileComponent,
+    ConversationsHasMessagePipe
   ],
   imports: [
     CommonModule,

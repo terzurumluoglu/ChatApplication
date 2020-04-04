@@ -9,13 +9,14 @@ export class ParticipantPipe implements PipeTransform {
 
   constructor(private _auth : AuthService){}
 
-  transform(data: Participant[]): any {
+  transform(data: Participant[]): User {
     const currentUserId : string = this._auth.getCurrentUserId();
     try {
-      const user: User = data.find(p => p.user.userId != currentUserId).user;
-      return user.firstname + ' ' + user.lastname;
+      const a = data.find(p => p.user.userId != currentUserId).user;
+      console.log(a);
+      return a
     } catch (error) {
-      return '';
+      return null;
     }
   }
 }

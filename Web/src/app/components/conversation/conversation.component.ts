@@ -67,6 +67,8 @@ export class ConversationComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    console.log(this.userModel);
+    
   }
 
   unsubscription(event: any) {
@@ -76,8 +78,16 @@ export class ConversationComponent implements OnInit {
     if (this.messagesSubs) { this.messagesSubs.unsubscribe(); }
   }
 
+  getLocalStorageUserModel(){
+    if (localStorage.getItem('userModel') === undefined) {
+      this._auth.signOut();
+    }else{
+      this.userModel = JSON.parse(localStorage.getItem('userModel'));
+    }
+  }
+
   main() {
-    this.userModel = JSON.parse(localStorage.getItem('userModel'));
+    this.getLocalStorageUserModel();
     this.currentUserId = this.userModel.user.userId;
     this.theme = this.userModel.user.settings.darkTheme;
     this.notify = this.userModel.user.settings.notify;
@@ -119,8 +129,9 @@ export class ConversationComponent implements OnInit {
   }
 
   async getConversations() {
-    this.conversationSubs = this._db.getConversations(this.currentUserId).valueChanges().subscribe(snap => {
-      this.cons = snap.map((doc: any) => doc.data()) as Conversation[];
+    this.conversationSubs = this._db.getConversations(this.currentUserId).valueChanges().subscribe((snap : firebase.firestore.DocumentData[]) => {
+      console.log(snap);
+      this.cons = snap as Conversation[];
       this.hasConversation = this.cons.length == 0 ? false : true;
       // if (this.cons.length == 0) { localStorage.setItem('userModel', JSON.stringify(this.userModel)); }
       for (let i = 0; i < this.cons.length; i++) {
@@ -143,7 +154,7 @@ export class ConversationComponent implements OnInit {
   getParticipants() {
     for (let i = 0; i < this.cons.length; i++) {
       this.participantSubs = this._db.getParticipants(this.currentUserId, this.cons[i].conversationId).valueChanges().subscribe(snapshot => {
-        const parts: Participant[] = snapshot.map((doc: any) => doc.data());
+        const parts: Participant[] = snapshot as Participant[];
         this.conversations[i].participants = parts;
         this.change(2, parts, i);
       });
@@ -153,7 +164,7 @@ export class ConversationComponent implements OnInit {
   getMessages() {
     for (let i = 0; i < this.cons.length; i++) {
       this.messagesSubs = this._db.getMessages(this.currentUserId, this.cons[i].conversationId).valueChanges().subscribe(snapshot => {
-        const messages: Message[] = snapshot.map((doc: any) => doc.data());
+        const messages: Message[] = snapshot as Message[];
         this.conversations[i].messages = messages;
         this.scrollToBottom();
         this.change(3, messages, i);
@@ -170,14 +181,20 @@ export class ConversationComponent implements OnInit {
   }
 
   change(type: number, data: any, index?: number) {
-    if (type === 1) {
-      this.userModel.conversations[index].conversation = data;
-    } else if (type === 2) {
-      this.userModel.conversations[index].participants = data;
-    } else if (type === 3) {
-      this.userModel.conversations[index].messages = data;
+    console.log(typeof data);
+    if (this.userModel.conversations.length === 0 && type === 1) {
+      const cm : ConversationModel = new ConversationModel(data,[],[]);
+      this.userModel.conversations.push(cm);
     } else {
-      this.userModel.user = data;
+      if (type === 1) {
+        this.userModel.conversations[index].conversation = data;
+      } else if (type === 2) {
+        this.userModel.conversations[index].participants = data;
+      } else if (type === 3) {
+        this.userModel.conversations[index].messages = data;
+      } else {
+        this.userModel.user = data;
+      }
     }
     localStorage.setItem('userModel', JSON.stringify(this.userModel));
   }
@@ -206,10 +223,11 @@ export class ConversationComponent implements OnInit {
   //RIGHT
   startConversation(selectedUser: User) {
     const con: ConversationModel = this._local.getConversation(selectedUser);
-    if (con === null) {
-      this.selectedConversation = this._db.startConversation(this.userModel.user, selectedUser);
-    } else {
+    console.log(con);
+    if (con) {
       this.selectedConversation = con;
+    } else {
+      this.selectedConversation = this._db.startConversation(this.userModel.user, selectedUser);
     }
   }
 

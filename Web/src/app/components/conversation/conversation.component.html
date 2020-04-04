@@ -99,13 +99,13 @@
                         </form> -->
                     <div class="sidebar-body">
                         <ul class="list-group list-group-flush" *ngIf="userModel?.conversations.length != 0">
-                            <li class="list-group-item open-chat" *ngFor="let conversation of userModel?.conversations"
+                            <li class="list-group-item open-chat" *ngFor="let conversation of userModel?.conversations | conversationsHasMessage"
                                 (click)="selectConversation(conversation?.conversation?.conversationId)">
                                 <figure class="avatar avatar-state-success">
-                                    <img src="./assets/dist/media/img/avataaars1.png" class="rounded-circle">
+                                    <img [src]="(conversation?.participants | participant)?.avatar?.downloadURL" class="rounded-circle">
                                 </figure>
                                 <div class="users-list-body" *ngIf="conversation">
-                                    <h5 [innerText]="conversation?.participants | participant">Patsy
+                                    <h5 [innerText]="(conversation?.participants | participant)?.firstname">Patsy
                                         Paulton</h5>
                                     <!-- <p>Traditional heading elscas sdscsd sdcsdsc</p> -->
                                     <p class="last-message"[innerText]="conversation?.messages | lastData :'messageContent'"></p>
@@ -115,7 +115,7 @@
                                 </div>
                             </li>
                         </ul>
-                        <div class="deneme">
+                        <div *ngIf="userModel?.conversations.length == 0" class="deneme">
                             <p *ngIf="userModel?.conversations.length == 0 && hasConversation">
                                 Yükleniyor...
                             </p>
@@ -283,10 +283,10 @@
                 <div class="chat-header" *ngIf="selectedConversation">
                     <div class="chat-header-user">
                         <figure class="avatar avatar-lg">
-                            <img src="./assets/dist/media/img/avataaars1.png" class="rounded-circle">
+                            <img [src]="(selectedConversation?.participants | participant)?.avatar?.downloadURL" class="rounded-circle">
                         </figure>
                         <div>
-                            <h5 [innerText]="selectedConversation?.participants | participant"></h5>
+                            <h5 [innerText]="(selectedConversation?.participants | participant)?.firstname"></h5>
                             <small class="text-muted">
                                 <i>Online</i>
                             </small>
