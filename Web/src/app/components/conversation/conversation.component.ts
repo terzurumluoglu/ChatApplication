@@ -194,6 +194,7 @@ export class ConversationComponent implements OnInit {
   }
 
   closeProfile() {
+    this.selectedUser = null;
     this.isProfileShow = false;
   }
 
