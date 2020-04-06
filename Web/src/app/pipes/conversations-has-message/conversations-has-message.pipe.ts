@@ -6,8 +6,10 @@ import { ConversationModel } from 'src/app/models/model';
 })
 export class ConversationsHasMessagePipe implements PipeTransform {
 
-  transform(datas : ConversationModel[]): unknown {
-    return datas.filter(p => p.messages.length != 0);
+  transform(datas : ConversationModel[]) {
+    console.log(datas);
+    // let d = datas.filter(p => p.conversation.isActive === true);
+    // console.log(d);
+    // return d
   }
-
 }

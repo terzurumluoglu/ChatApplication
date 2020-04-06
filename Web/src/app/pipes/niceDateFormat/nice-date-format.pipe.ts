@@ -11,12 +11,10 @@ export class NiceDateFormatPipe implements PipeTransform {
     var dif = Math.floor(((Date.now() - _value) / 1000) / 86400);
 
     if (dif < 30) {
-      console.log(this.convertToNiceDate(value));
       return this.convertToNiceDate(value);
     } else {
       var datePipe = new DatePipe("en-US");
       value = datePipe.transform(value, 'MMM d, y');
-      console.log(value);
       return value;
     }
   }

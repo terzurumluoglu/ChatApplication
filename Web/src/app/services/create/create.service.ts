@@ -38,7 +38,7 @@ export class CreateService {
 
   createConversationData(conversationId : string,sender: User) : Conversation {
     let creationTime: number = this._tool.getTime();
-    let conversation: Conversation = new Conversation(conversationId, creationTime, sender, null, true, false, null);
+    let conversation: Conversation = new Conversation(conversationId, creationTime, sender, null, false, false, null);
     return conversation;
   }
 

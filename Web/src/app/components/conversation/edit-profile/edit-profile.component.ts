@@ -1,10 +1,11 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, Input, DoCheck } from '@angular/core';
 import { Update,User, UserModel } from 'src/app/models/model';
 import { FormBuilder, Validators, FormGroup } from '@angular/forms';
 import { DatabaseService } from 'src/app/services/firebase/database/database.service';
 import { StorageService } from 'src/app/services/firebase/storage/storage.service';
 import { ErrorInterceptor } from 'src/app/helpers/error.interceptor';
 import { ToastrService } from 'ngx-toastr';
+import { AuthService } from 'src/app/services/firebase/auth/auth.service';
 
 @Component({
   selector: 'app-edit-profile',
@@ -12,16 +13,17 @@ import { ToastrService } from 'ngx-toastr';
   styleUrls: ['./edit-profile.component.css']
 })
 export class EditProfileComponent implements OnInit {
-
   privacy: boolean =false;
   userModel: UserModel;
   profileForm: FormGroup;
   selectedFile : any;
   base64 : string = '';
   currentUserId : string;
+  user : User;
   constructor(
     private cd: ChangeDetectorRef,
     private formBuilder: FormBuilder,
+    private _auth : AuthService,
     private _db: DatabaseService,
     private _error : ErrorInterceptor,
     private _storage : StorageService,
@@ -32,10 +34,10 @@ export class EditProfileComponent implements OnInit {
   ngOnInit(): void {
   }
   main(){
-    this.userModel = JSON.parse(localStorage.getItem('userModel'));
-    this.currentUserId = this.userModel.user.userId;
-    this.privacy = this.userModel.user.settings.isPrivate;
-    this.base64 = this.userModel.user.avatar ? this.userModel.user.avatar.downloadURL : null;
+    this.currentUserId = this._auth.getCurrentUserId();
+    this.user = (JSON.parse(localStorage.getItem('user')) as UserModel).user;
+    this.privacy = this.user.settings.isPrivate;
+    this.base64 = this.user.avatar ? this.user.avatar.downloadURL : null;
     this.createForm();
   }
   
@@ -44,7 +46,6 @@ export class EditProfileComponent implements OnInit {
     this._db.updateUserDataByUserId(this.currentUserId, 'settings.privacy', selectedPrivacy).then(() => {
       // Success
       this.userModel.user.settings.isPrivate = selectedPrivacy;
-      localStorage.setItem('userModel', JSON.stringify(this.userModel));
     }).catch(e => {
       // Fail
       this.privacy = !selectedPrivacy;
@@ -54,11 +55,11 @@ export class EditProfileComponent implements OnInit {
   createForm() {
     let filename : string;
     this.profileForm = this.formBuilder.group({
-      firstname: [this.userModel.user.firstname, Validators.required],
-      lastname: [this.userModel.user.lastname, Validators.required],
+      firstname: [this.user.firstname, Validators.required],
+      lastname: [this.user.lastname, Validators.required],
       avatar: [null, [Validators.required]],
       imageValidator: [filename, Validators.required],
-      bio: [this.userModel.user.bio,[]],
+      bio: [this.user.bio,[]],
     });
   }
   
@@ -87,8 +88,9 @@ export class EditProfileComponent implements OnInit {
     datas.forEach(element => {
       this._taost.info('Loading...','Profile updating...');
       if (element.key == 'avatar') {
-        this._storage.saveAvatar(this.currentUserId,element.value,'personal').then(() => {
-          this._taost.success('Success','Your Profile was updated');
+        this._storage.saveAvatar(this.currentUserId,element.value,'personal')
+        .then(() => {
+          this._taost.success('Success','Your Profile was updated (Photo)');
         }).catch(e => {
           this._error.handleError(e);
         });

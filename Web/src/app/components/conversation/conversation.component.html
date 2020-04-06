@@ -94,15 +94,15 @@
                             </li>
                         </ul>
                     </header>
-                    <!-- <form action="">
-                            <input type="text" class="form-control" placeholder="Search chat">
-                        </form> -->
+                    <form action="">
+                        <input type="text" class="form-control" placeholder="Search chat">
+                    </form>
                     <div class="sidebar-body">
-                        <ul class="list-group list-group-flush" *ngIf="userModel?.conversations.length != 0">
-                            <li class="list-group-item open-chat" *ngFor="let conversation of userModel?.conversations | conversationsHasMessage"
+                        <ul class="list-group list-group-flush" *ngIf="conversations.length != 0">
+                            <li class="list-group-item open-chat" *ngFor="let conversation of conversations"
                                 (click)="selectConversation(conversation?.conversation?.conversationId)">
                                 <figure class="avatar avatar-state-success">
-                                    <img [src]="(conversation?.participants | participant)?.avatar?.downloadURL" class="rounded-circle">
+                                    <img [src]="(conversation?.participants | participant)?.avatar?.downloadURL || emptyAvatar" class="rounded-circle">
                                 </figure>
                                 <div class="users-list-body" *ngIf="conversation">
                                     <h5 [innerText]="(conversation?.participants | participant)?.firstname">Patsy
@@ -115,8 +115,8 @@
                                 </div>
                             </li>
                         </ul>
-                        <div *ngIf="userModel?.conversations.length == 0" class="deneme">
-                            <p *ngIf="userModel?.conversations.length == 0 && hasConversation">
+                        <div *ngIf="conversations.length == 0" class="deneme">
+                            <p *ngIf="conversations.length == 0 && hasConversation">
                                 Yükleniyor...
                             </p>
                             <p *ngIf="!hasConversation">
@@ -145,21 +145,20 @@
                             </li>
                         </ul>
                     </header>
-                    <!-- <form action="">
-                            <input type="text" class="form-control" placeholder="Search chat">
-                        </form> -->
+                    <form action="">
+                        <input type="text" class="form-control" placeholder="Search chat">
+                    </form>
                     <div class="sidebar-body">
                         <ul class="list-group list-group-flush">
-                            <li class="list-group-item" *ngFor="let u of users" (click)="selectUser(u)">
+                            <li class="list-group-item" *ngFor="let user of users | async" (click)="selectUser(user)">
                                 <div>
                                     <figure class="avatar">
-                                        <img [src]="u?.avatar?.downloadURL || emptyAvatar" class="rounded-circle">
+                                        <img [src]="user?.avatar?.downloadURL || emptyAvatar" class="rounded-circle">
                                     </figure>
                                 </div>
                                 <div class="users-list-body">
-                                    <h5>{{u?.firstname}} {{u?.lastname}}</h5>
-                                    <!-- <p>Lorem ipsum dolor sitsdc sdcsdc sdcsdcs</p> -->
-                                    <p>{{isProfileShow}}</p>
+                                    <h5>{{user?.firstname}} {{user?.lastname}}</h5>
+                                    <p>{{user?.bio}}</p>
                                     <div class="users-list-action action-toggle">
                                         <div class="dropdown">
                                             <a data-toggle="dropdown">
@@ -193,9 +192,9 @@
                             </li>
                         </ul>
                     </header>
-                    <!-- <form action="">
-                            <input type="text" class="form-control" placeholder="Search favorites">
-                        </form> -->
+                    <form action="">
+                        <input type="text" class="form-control" placeholder="Search favorites">
+                    </form>
                     <div class="sidebar-body">
                         <ul class="list-group list-group-flush users-list">
                             <li class="list-group-item">
@@ -283,7 +282,7 @@
                 <div class="chat-header" *ngIf="selectedConversation">
                     <div class="chat-header-user">
                         <figure class="avatar avatar-lg">
-                            <img [src]="(selectedConversation?.participants | participant)?.avatar?.downloadURL" class="rounded-circle">
+                            <img [src]="(selectedConversation?.participants | participant)?.avatar?.downloadURL || emptyAvatar" class="rounded-circle">
                         </figure>
                         <div>
                             <h5 [innerText]="(selectedConversation?.participants | participant)?.firstname"></h5>
@@ -328,14 +327,14 @@
                             </div>
                             -->
                     <div class="messages">
-                        <div [class]="userModel?.user?.userId == message?.sender?.userId ? 'message-item outgoing-message' : 'message-item '"
+                        <div [class]="user?.userId == message?.sender?.userId ? 'message-item outgoing-message' : 'message-item '"
                             *ngFor="let message of selectedConversation?.messages">
                             <div class="message-content">
                                 {{message?.messageContent}}
                             </div>
                             <div class="message-action">
                                 {{message?.createdTime | date : 'd/M/yy, h:mm a'}}
-                                <i class="ti-double-check"></i>
+                                <i [ngClass]="message?.isRead ? 'ti-double-check color-read' : (message?.isSended ? 'ti-double-check' : 'ti-time')" *ngIf="user?.userId == message?.sender?.userId"></i>
                             </div>
                         </div>
                     </div>
@@ -406,13 +405,11 @@
                             </ul>
                         </div>
                         <hr>
-                        <div class="pl-4 pr-4">
+                        <div class="pl-4 pr-4" *ngIf="selectedUser?.bio">
                             <h6>About</h6>
-                            <p class="text-muted">I love reading, traveling and discovering new things. You need to be happy
-                                in
-                                life.</p>
+                            <p class="text-muted" [innerText]="selectedUser?.bio"></p>
                         </div>
-                        <hr>
+                        <hr *ngIf="selectedUser?.bio">
                         <div class="pl-4 pr-4">
                             <h6>Phone</h6>
                             <p class="text-muted">(555) 555 55 55</p>

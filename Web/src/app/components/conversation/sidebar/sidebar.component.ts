@@ -19,7 +19,6 @@ export class SidebarComponent implements OnInit {
   ngOnInit(): void {
   }
 
-
   logout() {
     this.unsubscribe.emit(true);
     this._auth.signOut().then(() => {

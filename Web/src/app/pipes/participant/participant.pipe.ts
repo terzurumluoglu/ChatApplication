@@ -13,7 +13,6 @@ export class ParticipantPipe implements PipeTransform {
     const currentUserId : string = this._auth.getCurrentUserId();
     try {
       const a = data.find(p => p.user.userId != currentUserId).user;
-      console.log(a);
       return a
     } catch (error) {
       return null;

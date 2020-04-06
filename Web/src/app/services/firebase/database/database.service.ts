@@ -16,19 +16,9 @@ export class DatabaseService {
   // userRef : any = firebase.firestore().collection('users');
   userModel: UserModel;
   constructor(
-    private angularFirestore : AngularFirestore,
+    private angularFirestore: AngularFirestore,
     private _create: CreateService,
     private _tool: ToolService) {
-    }
-
-  async getCollectionData(collection: firebase.firestore.CollectionReference<firebase.firestore.DocumentData>, paramName?: string, param?: any) {
-    let snapshot: any;
-    if (param) {
-      snapshot = await collection.where(paramName, '==', param).get();
-    } else {
-      snapshot = await collection.get();
-    }
-    return snapshot.docs.map((doc: any) => doc.data());
   }
 
   // REGISTER
@@ -38,13 +28,13 @@ export class DatabaseService {
       userId: user.userId,
       firstname: user.firstname,
       lastname: user.lastname,
-      email : user.email,
+      email: user.email,
       creationTime: user.creationTime,
-      devices : [],
-      settings : {
-        isPrivate : user.settings.isPrivate,
-        darkTheme : user.settings.darkTheme,
-        notify : user.settings.notify
+      devices: [],
+      settings: {
+        isPrivate: user.settings.isPrivate,
+        darkTheme: user.settings.darkTheme,
+        notify: user.settings.notify
       },
       isActive: true,
       isDeleted: false,
@@ -54,69 +44,8 @@ export class DatabaseService {
     return user;
   }
 
-  // SIGN IN
-  // logIn(uId: string) {
-  //   this.getUserByUserId(uId).then((user : User) => {
-  //     if (localStorage.getItem('userModel') === undefined) {
-  //       let userModel: UserModel = new UserModel(user, []);
-  //       userModel.user = user
-  //       localStorage.setItem('userModel', JSON.stringify(this.userModel));
-  //     } else {
-  //       let userModel: UserModel = JSON.parse(localStorage.getItem('userModel'));
-  //       userModel.user = user
-  //       localStorage.setItem('userModel', JSON.stringify(this.userModel));
-  //     }
-  //   }).catch(e => {
-  //     //ERROR
-  //   });
-  //   // .onSnapshot(snap => {
-  //   //   console.log(snap.data());
-  //   //   if (localStorage.getItem('userModel') === undefined) {
-  //   //     let userModel : UserModel = new UserModel(snap.data() as User,[]);
-  //   //     userModel.user = snap.data() as User;
-  //   //     localStorage.setItem('userModel',JSON.stringify(this.userModel));
-  //   //   }else{
-  //   //     let userModel : UserModel = JSON.parse(localStorage.getItem('userModel'));
-  //   //     userModel.user = snap.data() as User;
-  //   //     localStorage.setItem('userModel',JSON.stringify(this.userModel));
-  //   //   }
-  //   // })
-  // }
-
-  getUserByUserId(uId: string): Promise<User | any> {
-    return new Promise((res, rej) => {
-      this.userRef.doc(uId).get().then((u: firebase.firestore.DocumentSnapshot<firebase.firestore.DocumentData>) => {
-        res(u.data() as User);
-      }).catch(e => {
-        rej(e);
-      });
-    })
-  }
-
-  // updateUserByUserId() {
-  //   const settings: Settings = new Settings(true, false);
-  //   const u: User = new User('llMP38HkC2UEqHD1zu5GojDDmWd2', 'Toprak', 'Erzurumluoğlu', "toprakerzurumluoglu@hotmail.com", 1584806583788, [], settings, true, true, false, null);
-  //   // {"creationTime":1584806583788,"deletedTime":null,"devices":[],"email":"toprakerzurumluoglu@hotmail.com","firstname":"Toprak","isActive":true,"isDeleted":false,"isPrivate":false,"lastname":"Erzurumluoğlu","userId":"llMP38HkC2UEqHD1zu5GojDDmWd2"}
-  //   this.userRef.doc('llMP38HkC2UEqHD1zu5GojDDmWd2').set(Object.assign({}, {
-  //     "creationTime": 1584806583788,
-  //     "deletedTime": null,
-  //     "devices": [],
-  //     "email": "toprakerzurumluoglu@hotmail.com",
-  //     "firstname": "Toprak",
-  //     "isActive": true,
-  //     "isDeleted": false,
-  //     "isPrivate": false,
-  //     "settings": {
-  //       'alert': false,
-  //       'darkTheme': true
-  //     },
-  //     "lastname": "Erzurumluoğlu",
-  //     "userId": "llMP38HkC2UEqHD1zu5GojDDmWd2"
-  //   }));
-  // }
-
-  updateUserDataByUserId(uid : string,key : string,value : any) {
-    return this.userRef.doc(uid).update(key,value);
+  updateUserDataByUserId(uid: string, key: string, value: any) {
+    return this.userRef.doc(uid).update(key, value);
   }
 
   addDevice(uid: string, token: string) {
@@ -127,18 +56,9 @@ export class DatabaseService {
     );
   }
 
-  addAvatar(uid : string,file: File,fileName: string, contentType: string,downloadURL: string) {
-    let data: Avatar = this._create.createAvatarData(fileName,contentType,file.size,downloadURL);
-    return this.updateUserDataByUserId(uid,'avatar',(Object.assign({},data)));
-  }
-
-
-  // GET ALL OTHER USER
-  async getAllUsers(userId: string) {
-    let users: User[] = await this.getCollectionData(this.userRef);
-    let cu: number = users.indexOf(users.find(p => p.userId == userId));
-    users.splice(cu, 1);
-    return users;
+  addAvatar(uid: string, file: File, fileName: string, contentType: string, downloadURL: string) {
+    let data: Avatar = this._create.createAvatarData(fileName, contentType, file.size, downloadURL);
+    return this.updateUserDataByUserId(uid, 'avatar', (Object.assign({}, data)));
   }
 
   startConversation(sender: User, receiver: User): ConversationModel {
@@ -162,24 +82,42 @@ export class DatabaseService {
     return datas[0];
   }
 
-  getUser(userId : string){
+  getUser(userId: string) {
     return this.angularFirestore.collection('users').doc(userId);
   }
 
-  getConversations(userId: string) {
-    return this.angularFirestore.collection('users').doc(userId).collection('conversations');
+  getAllUsers(){
+    return this.angularFirestore.collection('users');
   }
+
+  getConversations(userId: string) {
+    return this.angularFirestore.collection('users').doc(userId).collection('conversations',ref=> ref.where('isDeleted','==',false).where('isActive','==',true));
+  }
+
+  // delete(userId: string){
+  //   this.getConversations(userId).get().subscribe(p => {
+  //     this.angularFirestore.collection('users').doc(userId).collection('conversations').doc(p.docs[0].id).delete();
+  //   });
+  // }
 
   getParticipants(userId: string, conversationId: string) {
     return this.angularFirestore.collection('users').doc(userId).collection('conversations').doc(conversationId).collection('participants');
   }
 
   getMessages(userId: string, conversationId: string) {
-    return this.angularFirestore.collection('users').doc(userId).collection('conversations').doc(conversationId).collection('messages',ref => ref.orderBy('createdTime', 'asc'));
+    return this.angularFirestore.collection('users').doc(userId).collection('conversations').doc(conversationId).collection('messages', ref => ref.orderBy('createdTime', 'asc'));
+  }
+
+  updateConversationDataByConversationId(uid: string, conversationId: string, key: string, value: any) {
+    return this.userRef.doc(uid).collection('conversations').doc(conversationId).update(key, value);
   }
 
   sendMessage(messageContent: string, conversation: ConversationModel, sender: User, receiver: User) {
     const message: Message = this._create.createMessageData(messageContent, sender, conversation.conversation.conversationId, null, null);
+    if (conversation.conversation.isActive === false) {
+      this.updateConversationDataByConversationId(sender.userId, conversation.conversation.conversationId, 'isActive', true);
+      this.updateConversationDataByConversationId(receiver.userId, conversation.conversation.conversationId, 'isActive', true);
+    }
     var senderMessageRef = this.userRef.doc(sender.userId).collection('conversations').doc(conversation.conversation.conversationId).collection('messages');
     var receiverMessageRef = this.userRef.doc(receiver.userId).collection('conversations').doc(conversation.conversation.conversationId).collection('messages');
     const key: string = senderMessageRef.doc().id;

@@ -33,8 +33,7 @@ export class RegisterComponent implements OnInit {
   onSubmit() {
     this._auth.createUserWithEmailAndPassword(this.f.email.value,this.f.password.value).then(credential => {
       this._db.addUser(this.f.firstname.value, this.f.lastname.value, credential).then((user : User) => {
-        let userModel : UserModel = new UserModel(user,[]);
-        localStorage.setItem('userModel',JSON.stringify(userModel));
+        localStorage.setItem('user', JSON.stringify(new UserModel(user, [])));
         this.router.navigate(['/conversation']);
       });
     }).catch(e => {

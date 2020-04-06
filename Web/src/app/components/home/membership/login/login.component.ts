@@ -23,6 +23,11 @@ export class LoginComponent implements OnInit {
     private _error: ErrorInterceptor
   ) {
     this.createForm();
+    // _auth.authState().subscribe(user => {
+    //   if (user) {
+    //     router.navigate(['conversation']);
+    //   }
+    // });
   }
 
   ngOnInit(): void {
@@ -31,15 +36,16 @@ export class LoginComponent implements OnInit {
   get f() { return this.loginForm.controls; }
 
   onSubmit() {
+    console.log('Lütfen Bekleyin...');
     this._auth.signInWithEmailAndPassword(this.f.email.value, this.f.password.value).then(credential => {
-      console.log(credential);
       this._db.getUser(credential.user.uid).get()
       .subscribe((user) => {
-        console.log(user.data());
-        localStorage.setItem('userModel', JSON.stringify(new UserModel(user.data() as User, [])));
+        localStorage.setItem('user', JSON.stringify(new UserModel(user.data() as User, [])));
+        console.log('Başarılı!');
         this.router.navigate(['/conversation']);
       })
     }).catch(e => {
+      console.log('Başarısız!');
       this._error.handleError(e);
     });
   }

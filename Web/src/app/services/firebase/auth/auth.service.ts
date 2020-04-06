@@ -15,7 +15,7 @@ export class AuthService {
   ) {
     angularFireAuth.authState.subscribe(user => {
       if (user) {
-        localStorage.setItem('userId',user.uid);
+        localStorage.setItem('userId',btoa(user.uid));
       } else {
         localStorage.setItem('userId',null);
       }
@@ -23,7 +23,7 @@ export class AuthService {
   }
 
   getCurrentUserId(){
-    return localStorage.getItem('userId') ?? null;
+    return atob(localStorage.getItem('userId')) ?? null;
   }
 
   get isLoggedIn() : boolean{

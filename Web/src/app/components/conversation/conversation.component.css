@@ -52,6 +52,14 @@
     color : #ff7373 !important;
 }
 
+.color-read{
+    color: #0aea63; 
+ }
+
+.dark .color-read{
+    color: #fff; 
+ }
+
 .deneme{
     height: 50px;
     margin-left: 10px;
@@ -70,3 +78,7 @@
 .delete:hover{
     color : #dc3545;
 }
+.chat-body:focus{
+    outline-color: transparent !important;
+}
+
