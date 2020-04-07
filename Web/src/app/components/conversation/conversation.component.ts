@@ -3,7 +3,8 @@ import { UserModel, User, ConversationModel, Conversation, Participant, Message 
 import { DatabaseService } from 'src/app/services/firebase/database/database.service';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { AuthService } from 'src/app/services/firebase/auth/auth.service';
-import { Subscription, Observable } from 'rxjs';
+import { Subscription, Observable,fromEvent } from 'rxjs';
+import { FcmService } from 'src/app/services/firebase/fcm/fcm.service';
 
 @Component({
   selector: 'app-conversation',
@@ -27,18 +28,22 @@ export class ConversationComponent implements OnInit,OnDestroy {
   notify: boolean = false;
   emptyAvatar: string = './assets/dist/media/img/empty-avatar.png';
 
-  public userSubs: Subscription;
-  public conversationSubs: Subscription;
-  public participantSubs: Subscription;
-  public messagesSubs: Subscription;
+  userSubs: Subscription;
+  conversationSubs: Subscription;
+  participantSubs: Subscription;
+  messagesSubs: Subscription;
+  keyListenerSubscription : Subscription;
 
+  message : any;
   constructor(
     private formBuilder: FormBuilder,
     private _auth: AuthService,
-    private _db: DatabaseService
+    private _db: DatabaseService,
+    private _fcm : FcmService
   ) {
     this.currentUserId = _auth.getCurrentUserId();
     this.main();
+    this.fcm(this.currentUserId);
   }
 
   changeTheme(selectedTheme: boolean) {
@@ -65,9 +70,21 @@ export class ConversationComponent implements OnInit,OnDestroy {
 
   ngOnInit(): void {
     console.log('onInit!');
+    // User is Online
+    this._db.updateUserDataByUserId(this.currentUserId,'status','online');
   }
+
   ngOnDestroy(){
     console.log('destroyed!');
+    // User is offline
+    this._db.updateUserDataByUserId(this.currentUserId,'status','offline');
+    this.keyListenerSubscription.unsubscribe();
+  }
+
+  keyListener(){
+    this.keyListenerSubscription = fromEvent(document, 'keypress').subscribe(e => {
+      console.log('Typing...');
+    })
   }
 
   unsubscription(event: any) {
@@ -89,6 +106,8 @@ export class ConversationComponent implements OnInit,OnDestroy {
   getUser(){
     this.userSubs = this._db.getUser(this.currentUserId).valueChanges().subscribe((user : User) => {
       this.user = user;
+      this.theme = user.settings.darkTheme;
+      this.notify = user.settings.notify;
       localStorage.setItem('user', JSON.stringify(new UserModel(user, [])));
     });
   }
@@ -148,6 +167,7 @@ export class ConversationComponent implements OnInit,OnDestroy {
   selectConversation(conversationId: string) {
     this.selectedConversation = this.conversations.find(c => c.conversation.conversationId == conversationId);
     console.log(this.selectedConversation);
+    this.keyListener();
     this.scrollToBottom();
   }
 
@@ -182,8 +202,12 @@ export class ConversationComponent implements OnInit,OnDestroy {
       } catch (err) {
         // console.log('111111111111');
       }
-    }, 250);
+    });
   }
-  
-  
+
+  fcm(userId : string){
+    this._fcm.requestPermission(userId);
+    this._fcm.receiveMessage();
+    this.message = this._fcm.currentMessage;
+  }
 }
