@@ -9,6 +9,7 @@ import { AngularFireAuthModule } from 'angularfire2/auth';
 import { AngularFirestoreModule } from 'angularfire2/firestore';
 import { AngularFireStorageModule } from 'angularfire2/storage';
 import * as firebase from 'firebase/app';
+import { AngularFireMessagingModule } from 'angularfire2/messaging';
 // ng generate module articles/articles --module app --flat --routing
 
 @NgModule({
@@ -23,6 +24,7 @@ import * as firebase from 'firebase/app';
     AngularFireAuthModule,
     AngularFirestoreModule,
     AngularFireStorageModule,
+    AngularFireMessagingModule,
     HttpClientModule,
     ConversationModule
   ],

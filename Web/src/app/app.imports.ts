@@ -10,6 +10,7 @@ import { AuthService } from './services/firebase/auth/auth.service';
 import { DatabaseService } from './services/firebase/database/database.service';
 import { HomeModule } from './components/home/home.module';
 import { ToolService } from './services/tool/tool.service';
+import { FcmService } from './services/firebase/fcm/fcm.service';
 
 export const MODULES = [
     BrowserModule,
@@ -28,7 +29,7 @@ export const PROVIDERS = [
 
     AuthService,
     DatabaseService,
-    
+    FcmService,
     ToastService,
     ToolService,
     WindowService,
