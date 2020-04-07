@@ -49,11 +49,9 @@ export class DatabaseService {
   }
 
   addDevice(uid: string, token: string) {
-    this.userRef.doc(uid).update(
-      {
-        devices: firebase.firestore.FieldValue.arrayUnion({ token: token })
-      }
-    );
+    const deviceRef = this.userRef.doc(uid).collection('devices');
+    const deviceRefKey : string = deviceRef.doc().id;
+    deviceRef.doc(deviceRefKey).set({key : deviceRefKey,token : token});
   }
 
   addAvatar(uid: string, file: File, fileName: string, contentType: string, downloadURL: string) {
