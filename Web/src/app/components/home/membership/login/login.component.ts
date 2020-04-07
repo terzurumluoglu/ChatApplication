@@ -23,11 +23,6 @@ export class LoginComponent implements OnInit {
     private _error: ErrorInterceptor
   ) {
     this.createForm();
-    // _auth.authState().subscribe(user => {
-    //   if (user) {
-    //     router.navigate(['conversation']);
-    //   }
-    // });
   }
 
   ngOnInit(): void {
