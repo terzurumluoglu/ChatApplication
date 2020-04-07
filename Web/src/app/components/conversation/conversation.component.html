@@ -342,7 +342,7 @@
                 <div class="chat-footer" *ngIf="selectedConversation">
                     <form [formGroup]="messageForm" (ngSubmit)="onSubmit()">
                         <input type="text" formControlName="message" class="form-control" placeholder="Recipient's username"
-                            aria-label="Recipient's username" aria-describedby="button-addon2">
+                            aria-label="Recipient's username" aria-describedby="button-addon2" autofocus>
                         <div class="form-buttons">
                             <button class="btn btn-light btn-floating">
                                 <i class="fa fa-paperclip"></i>
