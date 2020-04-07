@@ -33,6 +33,7 @@ export class EditProfileComponent implements OnInit {
   }
   ngOnInit(): void {
   }
+
   main(){
     this.currentUserId = this._auth.getCurrentUserId();
     this.user = (JSON.parse(localStorage.getItem('user')) as UserModel).user;
