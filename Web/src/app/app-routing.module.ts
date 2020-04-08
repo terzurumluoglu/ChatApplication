@@ -3,6 +3,7 @@ import { Routes, RouterModule } from '@angular/router';
 import { AuthGuard } from './guards/auth/auth.guard';
 import { SidebarComponent } from './components/conversation/sidebar/sidebar.component';
 import { ConversationComponent } from './components/conversation/conversation.component';
+import { RouteGuard } from './guards/route/route.guard';
 
 const routes: Routes = [
   {
@@ -13,7 +14,8 @@ const routes: Routes = [
   {
     path : 'home',
     loadChildren: () => import('./components/home/home.module')
-    .then(m => m.HomeModule)
+    .then(m => m.HomeModule),
+    canActivate : [RouteGuard]
   },
   {
     path : 'conversation',
