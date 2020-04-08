@@ -18,7 +18,7 @@ export class CreateService {
     let userId: string = userCredential.user.uid;
     let email : string = userCredential.user.email;
     let creationTime: number = parseInt(userCredential.user.metadata['b']);
-    let user: User = new User(userId, firstname, lastname,email, creationTime, [], settings, true, false, null,null,null);
+    let user: User = new User(userId, firstname, lastname,email, creationTime, settings, true, false, null,null,null);
     return user;
   }
 
