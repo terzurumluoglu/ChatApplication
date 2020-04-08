@@ -17,7 +17,7 @@ export class AuthService {
       if (user) {
         localStorage.setItem('userId',btoa(user.uid));
       } else {
-        localStorage.setItem('userId',null);
+        localStorage.setItem('userId',btoa(null));
       }
     })
   }
