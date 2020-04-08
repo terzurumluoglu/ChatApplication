@@ -4,20 +4,18 @@ export class User {
     lastname: string;
     email : string;
     creationTime: number;
-    devices : Device[];
     settings : Settings;
     isActive: boolean;
     isDeleted: boolean;
     deletedTime: number;
     avatar : Avatar;
     bio : string
-    constructor(userId: string, firstname: string, lastname: string,email : string, creationTime: number,devices : Device[],settings : Settings, isActive: boolean, isDeleted: boolean, deletedTime: number,avatar : Avatar,bio : string) {
+    constructor(userId: string, firstname: string, lastname: string,email : string, creationTime: number,settings : Settings, isActive: boolean, isDeleted: boolean, deletedTime: number,avatar : Avatar,bio : string) {
         this.userId = userId;
         this.firstname = firstname;
         this.lastname = lastname;
         this.email = email;
         this.creationTime = creationTime;
-        this.devices = devices;
         this.settings = settings;
         this.isActive = isActive;
         this.isDeleted = isDeleted;
@@ -27,9 +25,11 @@ export class User {
     }
 }
 
-export class Device {
-    token: string;
-    constructor(token ?: string){
+export class Device{
+    key : string;
+    token : string;
+    constructor(key : string,token : string){
+        this.key = key;
         this.token = token;
     }
 }
