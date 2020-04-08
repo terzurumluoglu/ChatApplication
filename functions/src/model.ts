@@ -4,26 +4,33 @@ export class User {
     lastname: string;
     email : string;
     creationTime: number;
-    device : string;
     settings : Settings;
     isActive: boolean;
     isDeleted: boolean;
     deletedTime: number;
     avatar : Avatar;
     bio : string
-    constructor(userId: string, firstname: string, lastname: string,email : string, creationTime: number,device : string,settings : Settings, isActive: boolean, isDeleted: boolean, deletedTime: number,avatar : Avatar,bio : string) {
+    constructor(userId: string, firstname: string, lastname: string,email : string, creationTime: number,settings : Settings, isActive: boolean, isDeleted: boolean, deletedTime: number,avatar : Avatar,bio : string) {
         this.userId = userId;
         this.firstname = firstname;
         this.lastname = lastname;
         this.email = email;
         this.creationTime = creationTime;
-        this.device = device;
         this.settings = settings;
         this.isActive = isActive;
         this.isDeleted = isDeleted;
         this.deletedTime = deletedTime;
         this.avatar = avatar;
         this.bio = bio;
+    }
+}
+
+export class Device{
+    key : string;
+    token : string;
+    constructor(key : string,token : string){
+        this.key = key;
+        this.token = token;
     }
 }
 

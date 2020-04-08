@@ -1,6 +1,6 @@
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
-import { Message } from './model';
+import { Message, Device } from './model';
 admin.initializeApp();
 const _db = admin.firestore();
 const userRef = _db.collection('users');
@@ -18,6 +18,22 @@ export const updateMessageAsRead = functions.firestore.document('users/{userId}/
     console.log(context.params);
 });
 
+function findRepeatingElement(array: Device[]) : any[][] {
+    const temp : any = {};
+    const indexes : any[] = [];
+    const lastTokens : any[] = [];
+    for (let i = 0; i < array.length; i++){
+        if (temp[array[i].token]) {
+            indexes.push(i);
+        }
+        temp[array[i].token] = true;
+    }
+    temp.forEach((k : any) => {
+        lastTokens.push(array.find(f => f.token === k));
+    });
+    return [lastTokens, indexes];
+}
+
 export const inComingMessageNotification = functions.firestore
     .document('users/{userId}/conversations/{conversationId}/messages/{messageId}')
     .onCreate(async (snap, context) => {
@@ -31,13 +47,25 @@ export const inComingMessageNotification = functions.firestore
         const getTokenPromises = await tokenRef.get();
 
         // The array containing all the user's tokens.
-        const tokens: any[] = getTokenPromises.docs.map((doc: any) => doc.data().token);
-        console.log(tokens);
-        const keys: any[] = getTokenPromises.docs.map((doc: any) => doc.data().key);
-        console.log(keys);
+        const allTokens: Device[] = getTokenPromises.docs.map((doc: any) => doc.data());
+
+        const array = findRepeatingElement(allTokens);
+        const deviceTokens = array[0] as Device[];
+
+        const tokens = deviceTokens.map(p => p.token);
+
+        const indexes = array[1] as number[];
+
+        const tokensToRemove: any[] = [];
+        indexes.forEach(element => {
+            tokensToRemove.push(tokenRef.doc(allTokens[element].key).delete());
+        });
+        // console.log(tokens);
+        // const keys: any[] = getTokenPromises.docs.map((doc: any) => doc.data().key);
+        // console.log(keys);
 
         // Check if there are any device tokens.
-        if (getTokenPromises.size === 0) {
+        if (allTokens.length === 0) {
             console.log('There are no notification tokens to send to.');
             return 'There are no notification tokens to send to.';
         }
@@ -46,7 +74,7 @@ export const inComingMessageNotification = functions.firestore
             notification: {
                 title: 'Chat Application',
                 body: messageData !== undefined ? messageData.messageContent : 'Boş Mesaj',
-                icon: messageData.sender?.avatar?.downloadURL || 'https://randomuser.me/api/portraits/men/49.jpg'
+                icon: messageData.sender?.avatar?.downloadURL || 'https://toprakchatapplication.firebaseapp.com/assets/dist/media/img/empty-avatar.png'
             }
         };
 
@@ -57,7 +85,7 @@ export const inComingMessageNotification = functions.firestore
         }
         const response = await admin.messaging().sendToDevice(tokens, payload);
         // For each message check if there was an error.
-        const tokensToRemove: any[] = [];
+        
         response.results.forEach((result, index) => {
             const error = result.error;
             if (error) {
@@ -65,9 +93,10 @@ export const inComingMessageNotification = functions.firestore
                 // Cleanup the tokens who are not registered anymore.
                 if (error.code === 'messaging/invalid-registration-token' ||
                     error.code === 'messaging/registration-token-not-registered') {
-                    tokensToRemove.push(tokenRef.doc(keys[index]).delete());
+                    tokensToRemove.push(tokenRef.doc(deviceTokens[index].key).delete());
                 }
             }
+            console.log(tokensToRemove.length);
         });
         return Promise.all(tokensToRemove);
     });
