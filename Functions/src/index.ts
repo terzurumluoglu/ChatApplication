@@ -1,6 +1,6 @@
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
-import { Message, Device } from './model';
+import { Message, Device } from './model/model';
 admin.initializeApp();
 const _db = admin.firestore();
 const userRef = _db.collection('users');
@@ -28,9 +28,9 @@ function findRepeatingElement(array: Device[]) : any[][] {
         }
         temp[array[i].token] = true;
     }
-    temp.forEach((k : any) => {
+    for (let k in temp){
         lastTokens.push(array.find(f => f.token === k));
-    });
+    }
     return [lastTokens, indexes];
 }
 
