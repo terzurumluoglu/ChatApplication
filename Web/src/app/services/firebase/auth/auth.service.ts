@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { AngularFireAuth } from "angularfire2/auth";
 import * as firebase from "firebase/app";
 import 'firebase/auth';
+import { DatabaseService } from '../database/database.service';
 
 @Injectable({
   providedIn: 'root'
@@ -9,24 +10,24 @@ import 'firebase/auth';
 export class AuthService {
 
   currentUser: firebase.User;
-  
   constructor(
-    private angularFireAuth : AngularFireAuth
+    private angularFireAuth: AngularFireAuth,
+    private _db: DatabaseService
   ) {
     angularFireAuth.authState.subscribe(user => {
       if (user) {
-        localStorage.setItem('userId',btoa(user.uid));
+        localStorage.setItem('userId', btoa(user.uid));
       } else {
-        localStorage.setItem('userId',btoa(null));
+        localStorage.setItem('userId', btoa(null));
       }
     })
   }
 
-  getCurrentUserId(){
+  getCurrentUserId() {
     return atob(localStorage.getItem('userId')) ?? null;
   }
 
-  get isLoggedIn() : boolean{
+  get isLoggedIn(): boolean {
     return this.getCurrentUserId() !== null;
   }
 
@@ -43,6 +44,16 @@ export class AuthService {
   }
 
   signOut() {
-    return this.angularFireAuth.auth.signOut();
+    return new Promise((res,rej) => {
+      this._db.updateUserDataByUserId(this.getCurrentUserId(),'status','offline').then(() => {
+        this.angularFireAuth.auth.signOut().then(() => {
+          res(true);
+        }).catch(() => {
+          rej('0002'); // Sign out Fail
+        })
+      }).catch(() => {
+        rej('0001'); // DB Update Fail
+      });
+    });
   }
 }
