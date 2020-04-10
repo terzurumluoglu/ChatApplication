@@ -50,10 +50,8 @@ export class FcmService {
    * @param userId userId
    */
   requestPermission(userId : string) {
-    console.log(userId);
     this.angularFireMessaging.requestToken.subscribe(
       (token) => {
-        console.log(token);
         this.addToken(userId, token);
       },
       (err) => {
@@ -66,10 +64,11 @@ export class FcmService {
    * hook method when new notification received in foreground
    */
   receiveMessage() {
+    console.log('HOP');
     this.angularFireMessaging.messages.subscribe(
       (payload) => {
         console.log("new message received. ", payload);
         this.currentMessage.next(payload);
-      })
+      },e => {console.log(e)})
   }
 }

@@ -18,37 +18,56 @@ export const updateMessageAsRead = functions.firestore.document('users/{userId}/
     console.log(context.params);
 });
 
+// Bu metot user ın bütün device tokenlarını alır çoklanmış olanların tekilleştirir ve diğerlerinin indexlerini silinmek üzere ayırır.
 function findRepeatingElement(array: Device[]) : any[][] {
     const temp : any = {};
-    const indexes : any[] = [];
-    const lastTokens : any[] = [];
+    const deleteTokensIndexes : any[] = [];
+    const inUseTokens : any[] = [];
     for (let i = 0; i < array.length; i++){
         if (temp[array[i].token]) {
-            indexes.push(i);
+            deleteTokensIndexes.push(i);
         }
         temp[array[i].token] = true;
     }
-    for (let k in temp){
-        lastTokens.push(array.find(f => f.token === k));
+    for (const k in temp){
+        inUseTokens.push(array.find(f => f.token === k));
     }
-    return [lastTokens, indexes];
+    return [inUseTokens, deleteTokensIndexes];
 }
 
 export const inComingMessageNotification = functions.firestore
     .document('users/{userId}/conversations/{conversationId}/messages/{messageId}')
     .onCreate(async (snap, context) => {
 
+        // Gönderilen Mesaj Datası
         const messageData = snap.data() as Message;
+        
+        // Gönderen ve alıcı userId ( Hem Gönderen hem de alıcı mesaj koleksiyonuna sahip )
         const userId: string = context.params.userId as string;
 
-        // console.log(messageData);
-        // Push İçin Mesaj bilgileri ile Push Datası Oluşturma
+        // Gönderici' nin koleksiyonuna da mesajı yazdığımız için gönderici bilgisi de gelir ama ona bildirim gitmemesi için burada return ediyoruz.
+        if (userId === messageData.sender.userId) {
+            console.log('Mesaj sahibine bildirim gitmez!');
+            return 'Owner!';
+        }
+        
+        // Alıcı device token koleksiyonu
         const tokenRef = _db.collection('users').doc(userId).collection('devices');
+
+        // Alıcı device token koleksiyonu (Promise)
         const getTokenPromises = await tokenRef.get();
 
-        // The array containing all the user's tokens.
+        // Kişinin device koleksiyonundaki bütün datayı allTokens' a attık.
         const allTokens: Device[] = getTokenPromises.docs.map((doc: any) => doc.data());
+        
+        // Check if there are any device tokens.
+        // Receiver' ın herhangi bir cihazı kayıtlı değilse ona bildirim atamayız. Bu sebeple burdan return diyoruz.
+        if (allTokens.length === 0) {
+            console.log('There are no notification tokens to send to.');
+            return 'There are no notification tokens to send to.';
+        }
 
+        // array[0] Kişinin kullanıbilir device token bilgileri, array[1] Kişinin çoklanmış token bilgilerinin indexleri
         const array = findRepeatingElement(allTokens);
         const deviceTokens = array[0] as Device[];
 
@@ -56,33 +75,28 @@ export const inComingMessageNotification = functions.firestore
 
         const indexes = array[1] as number[];
 
+        // Silinecek Tokenlar
         const tokensToRemove: any[] = [];
         indexes.forEach(element => {
             tokensToRemove.push(tokenRef.doc(allTokens[element].key).delete());
         });
-        // console.log(tokens);
-        // const keys: any[] = getTokenPromises.docs.map((doc: any) => doc.data().key);
-        // console.log(keys);
 
-        // Check if there are any device tokens.
-        if (allTokens.length === 0) {
-            console.log('There are no notification tokens to send to.');
-            return 'There are no notification tokens to send to.';
+        // Notification Datası
+        const notification : admin.messaging.NotificationMessagePayload = {
+            title: 'Chat Application',
+            body: messageData !== undefined ? messageData.messageContent : 'Boş Mesaj',
+            icon: messageData.sender?.avatar?.downloadURL || 'https://toprakchatapplication.firebaseapp.com/assets/dist/media/img/empty-avatar.png',
+            clickAction : 'https://toprakchatapplication.firebaseapp.com/conversation',
+            // color : '#249c06',
+            // image : 'https://randomuser.me/api/portraits/women/57.jpg'
         }
 
-        const payload = {
-            notification: {
-                title: 'Chat Application',
-                body: messageData !== undefined ? messageData.messageContent : 'Boş Mesaj',
-                icon: messageData.sender?.avatar?.downloadURL || 'https://toprakchatapplication.firebaseapp.com/assets/dist/media/img/empty-avatar.png'
-            }
+        const payload : admin.messaging.MessagingPayload = {
+            notification: notification
         };
 
         // Send notifications to all tokens.
-        if (userId === messageData.sender.userId) {
-            console.log('Mesaj sahibine bildirim gitmez!');
-            return 'Owner!';
-        }
+        
         const response = await admin.messaging().sendToDevice(tokens, payload);
         // For each message check if there was an error.
         
@@ -96,14 +110,6 @@ export const inComingMessageNotification = functions.firestore
                     tokensToRemove.push(tokenRef.doc(deviceTokens[index].key).delete());
                 }
             }
-            console.log(tokensToRemove.length);
         });
         return Promise.all(tokensToRemove);
     });
-
-    // _db.collection('users').doc(userId).get().then((u) => {
-    //     const user = u.data() as User;
-    //     return admin.messaging().sendToDevice(user.device,payload)
-    // }).catch(e => {
-    //     console.log('HATA');
-    // });
