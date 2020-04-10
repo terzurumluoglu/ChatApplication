@@ -24,9 +24,9 @@ export class StorageService {
     const path : string = this.appName + '/' + privacy + '/' + uid + '/' + fileName;
     return new Promise((res,rej) => {
       this.angularFireStorage.upload(path,file).then(() => {
-        var sub = this.angularFireStorage.ref(path).getDownloadURL().subscribe(downloadURL => {
+        this.angularFireStorage.ref(path).getDownloadURL().subscribe(downloadURL => {
           this._db.addAvatar(uid, file, fileName, file.type, downloadURL).then(() => {
-            res(null)
+            res(null);
           }).catch(e => {
             rej(e);
           });
