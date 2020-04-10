@@ -2,15 +2,15 @@ export class User {
     userId: string;
     firstname: string;
     lastname: string;
-    email : string;
+    email: string;
     creationTime: number;
-    settings : Settings;
+    settings: Settings;
     isActive: boolean;
     isDeleted: boolean;
     deletedTime: number;
-    avatar : Avatar;
-    bio : string
-    constructor(userId: string, firstname: string, lastname: string,email : string, creationTime: number,settings : Settings, isActive: boolean, isDeleted: boolean, deletedTime: number,avatar : Avatar,bio : string) {
+    avatar: Avatar;
+    bio: string
+    constructor(userId: string, firstname: string, lastname: string, email: string, creationTime: number, settings: Settings, isActive: boolean, isDeleted: boolean, deletedTime: number, avatar: Avatar, bio: string) {
         this.userId = userId;
         this.firstname = firstname;
         this.lastname = lastname;
@@ -25,35 +25,35 @@ export class User {
     }
 }
 
-export class Device{
-    key : string;
-    token : string;
-    constructor(key : string,token : string){
+export class Device {
+    key: string;
+    token: string;
+    constructor(key: string, token: string) {
         this.key = key;
         this.token = token;
     }
 }
 
-export class Settings{
-    darkTheme : boolean;
-    notify : boolean;
-    isPrivate : boolean
-    constructor(darkTheme : boolean,notify : boolean,isPrivate : boolean){
+export class Settings {
+    darkTheme: boolean;
+    notify: boolean;
+    isPrivate: boolean
+    constructor(darkTheme: boolean, notify: boolean, isPrivate: boolean) {
         this.darkTheme = darkTheme;
         this.notify = notify;
         this.isPrivate = isPrivate;
     }
 }
 
-export class Avatar{
-    avatarName : string;
-    contentType : string;
-    size : number;
-    isActive : boolean;
-    isDeleted : boolean;
-    deletedTime : number;
-    downloadURL ?: string;
-    constructor(avatarName : string,contentType : string,size : number,isActive : boolean,isDeleted : boolean,deletedTime : number,downloadURL ?: string){
+export class Avatar {
+    avatarName: string;
+    contentType: string;
+    size: number;
+    isActive: boolean;
+    isDeleted: boolean;
+    deletedTime: number;
+    downloadURL?: string;
+    constructor(avatarName: string, contentType: string, size: number, isActive: boolean, isDeleted: boolean, deletedTime: number, downloadURL?: string) {
         this.avatarName = avatarName
         this.contentType = contentType;
         this.size = size
@@ -64,33 +64,59 @@ export class Avatar{
     }
 }
 
-export class Following{
-    followingId : string;
-    followee : User;
-    ownerId : string;
-    requestTime : number;
-    canFollow : boolean;
-    acceptTime : number;
-    isActive : boolean;
+export class Following {
+    followingId: string;
+    followee: User;
+    ownerId: string;
+    requestTime: number;
+    canFollow: boolean;
+    acceptTime: number;
+    isActive: boolean;
+    constructor(followingId: string, followee: User, ownerId: string, requestTime: number, canFollow: boolean, acceptTime: number, isActive: boolean) {
+        this.followingId = followingId;
+        this.followee = followee;
+        this.ownerId = ownerId;
+        this.requestTime = requestTime;
+        this.canFollow = canFollow;
+        this.acceptTime = acceptTime;
+        this.isActive = isActive;
+    }
 }
 
-export class Follower{
-    followerId : string;
-    follower : User;
-    ownerId : string;
-    requestTime : number;
-    canFollow : boolean;
-    acceptTime : number;
-    isActive : boolean;
+export class Follower {
+    followerId: string;
+    follower: User;
+    ownerId: string;
+    requestTime: number;
+    canFollow: boolean;
+    acceptTime: number;
+    isActive: boolean;
+    constructor(followerId: string, follower: User, ownerId: string, requestTime: number, canFollow: boolean, acceptTime: number, isActive: boolean) {
+        this.followerId = followerId;
+        this.follower = follower;
+        this.ownerId = ownerId;
+        this.requestTime = requestTime;
+        this.canFollow = canFollow;
+        this.acceptTime = acceptTime;
+        this.isActive = isActive;
+    }
 }
 
-export class Block{
-    blockId : string;
-    blockedUser : User;
-    ownerId : string;
-    blockedTime : number;
-    isActive : boolean;
-    liftTime : number;
+export class Block {
+    blockId: string;
+    blockedUser: User;
+    ownerId: string;
+    blockedTime: number;
+    liftTime: number;
+    isActive: boolean;
+    constructor(blockId: string, blockedUser: User, ownerId: string, blockedTime: number, liftTime: number, isActive: boolean) {
+        this.blockId = blockId;
+        this.blockedUser = blockedUser;
+        this.ownerId = ownerId;
+        this.blockedTime = blockedTime;
+        this.liftTime = liftTime;
+        this.isActive = isActive;
+    }
 }
 
 export class Conversation {
@@ -176,17 +202,17 @@ export class UserModel {
     conversations: ConversationModel[];
     follower: User[];
     following: User[];
-    constructor(user : User, conversations : ConversationModel[]) {
+    constructor(user: User, conversations: ConversationModel[]) {
         this.user = user;
         this.conversations = conversations;
     }
 }
 
 export class Update {
-    key : string;
-    value : any;
-    constructor(key : string, value : any) {
-      this.key = key;
-      this.value = value;
+    key: string;
+    value: any;
+    constructor(key: string, value: any) {
+        this.key = key;
+        this.value = value;
     }
-  }
+}
