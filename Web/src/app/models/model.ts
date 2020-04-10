@@ -64,6 +64,35 @@ export class Avatar{
     }
 }
 
+export class Following{
+    followingId : string;
+    followee : User;
+    ownerId : string;
+    requestTime : number;
+    canFollow : boolean;
+    acceptTime : number;
+    isActive : boolean;
+}
+
+export class Follower{
+    followerId : string;
+    follower : User;
+    ownerId : string;
+    requestTime : number;
+    canFollow : boolean;
+    acceptTime : number;
+    isActive : boolean;
+}
+
+export class Block{
+    blockId : string;
+    blockedUser : User;
+    ownerId : string;
+    blockedTime : number;
+    isActive : boolean;
+    liftTime : number;
+}
+
 export class Conversation {
     conversationId: string;
     createdTime: number;
