@@ -14,8 +14,7 @@ const routes: Routes = [
   {
     path : 'home',
     loadChildren: () => import('./components/home/home.module')
-    .then(m => m.HomeModule),
-    canActivate : [RouteGuard]
+    .then(m => m.HomeModule)
   },
   {
     path : 'conversation',
