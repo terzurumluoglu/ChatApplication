@@ -33,32 +33,5 @@ export class StorageService {
         })
       });
     })
-    // // downloadURL = task.downloadURL();
-    // return new Promise((res,rej) => {
-    //   this.ref.child(privacy).child(uid).child(fileName).put(file, { contentType: file.type }).then(() => {
-    //     this.getPhotoUrl(uid,privacy, fileName).then(downloadURL => {
-    //       this._db.addAvatar(uid, file, fileName, file.type, downloadURL).then(() => {
-    //         res(null);
-    //       }).catch(e => {
-    //         rej(e);
-    //       });
-    //     }).catch(e => {
-    //       rej(e);
-    //     });
-    //   }).catch(e => {
-    //     rej(e);
-    //   });
-    // })
   }
-
-  // getPhotoUrl(uid:string,privacy: string, fileName: string): Promise<string> {
-  //   return new Promise((res, rej) => {
-  //     // this.ref.child(privacy + '' '' '')
-  //     this.ref.child(privacy).child(uid).child(fileName).getDownloadURL().then(p => {
-  //       res(p);
-  //     }).catch(err => {
-  //       rej(err)
-  //     });
-  //   });
-  // }
 }
