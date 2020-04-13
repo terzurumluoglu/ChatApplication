@@ -5,7 +5,6 @@ import { DatabaseService } from 'src/app/services/firebase/database/database.ser
 import { Router } from '@angular/router';
 import { ErrorInterceptor } from 'src/app/helpers/error.interceptor';
 import { User, UserModel } from 'src/app/models/model';
-import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-login',
@@ -16,7 +15,6 @@ export class LoginComponent implements OnInit {
 
   title: string = 'Sign In';
   loginForm: FormGroup;
-  loginSubs : Subscription;
   constructor(
     private formBuilder: FormBuilder,
     private router: Router,
@@ -24,11 +22,6 @@ export class LoginComponent implements OnInit {
     private _db: DatabaseService,
     private _error: ErrorInterceptor
   ) {
-    const currentUserId = this._auth.getCurrentUserId();
-    console.log(currentUserId);
-    if (currentUserId !== 'null') {
-      router.navigate(['conversation']);
-    }
     this.createForm();
   }
 
@@ -40,8 +33,7 @@ export class LoginComponent implements OnInit {
   onSubmit() {
     console.log('Lütfen Bekleyin...');
     this._auth.signInWithEmailAndPassword(this.f.email.value, this.f.password.value).then(credential => {
-      this._db.getUser(credential.user.uid).get()
-      .subscribe((user) => {
+      this._db.getUser(credential.user.uid).get().subscribe((user) => {
         localStorage.setItem('user', JSON.stringify(new UserModel(user.data() as User, [])));
         console.log('Başarılı!');
         this.router.navigate(['/conversation']);
