@@ -21,6 +21,7 @@ export class DatabaseService {
     private _tool: ToolService) {
   }
 
+
   // REGISTER
   async addUser(firstname: string, lastname: string, credential: firebase.auth.UserCredential) {
     const user: User = this._create.createUserData(firstname, lastname, credential);
@@ -48,6 +49,16 @@ export class DatabaseService {
     return this.userRef.doc(uid).update(key, value);
   }
 
+  changeParticipantStatus(conversation : ConversationModel, userId: string, status : string){
+    const conId : string = conversation.conversation.conversationId;
+    const partId : string = conversation.participants.find(f => f.user.userId == userId).participantId;
+    conversation.participants.forEach(element => {
+      this.userRef.doc(element.user.userId)
+      .collection('conversations').doc(conId)
+      .collection('participants').doc(partId).update({status : status});
+    });
+  }
+
   addDevice(uid: string, token: string) {
     const deviceRef = this.userRef.doc(uid).collection('devices');
     const deviceRefKey : string = deviceRef.doc().id;
@@ -64,17 +75,12 @@ export class DatabaseService {
     let senderConRef = this.userRef.doc(sender.userId).collection('conversations');
     let receiverConRef = this.userRef.doc(receiver.userId).collection('conversations');
     const refS: firebase.firestore.CollectionReference<firebase.firestore.DocumentData>[] = [senderConRef, receiverConRef];
-    let conKey = senderConRef.doc().id;
     for (let i = 0; i < datas.length; i++) {
       let conRef = refS[i];
-      datas[i].conversation.conversationId = conKey;
-      conRef.doc(conKey).set(Object.assign({}, datas[i].conversation));
+      conRef.doc(datas[i].conversation.conversationId).set(Object.assign({}, datas[i].conversation));
       datas[i].participants.forEach(element => {
-        let partRef = conRef.doc(conKey).collection('participants');
-        let partKey = partRef.doc().id;
-        element.conversationId = conKey;
-        element.participantId = partKey;
-        partRef.doc(partKey).set(Object.assign({}, element));
+        let partRef = conRef.doc(datas[i].conversation.conversationId).collection('participants');
+        partRef.doc(element.participantId).set(Object.assign({}, element));
       });
     }
     return datas[0];
@@ -89,7 +95,7 @@ export class DatabaseService {
   }
 
   getConversations(userId: string) {
-    return this.angularFirestore.collection('users').doc(userId).collection('conversations',ref=> ref.where('isDeleted','==',false).where('isActive','==',true));
+    return this.angularFirestore.collection('users').doc(userId).collection('conversations',ref=> ref.where('isDeleted','==',false));
   }
 
   // delete(userId: string){
@@ -97,6 +103,17 @@ export class DatabaseService {
   //     this.angularFirestore.collection('users').doc(userId).collection('conversations').doc(p.docs[0].id).delete();
   //   });
   // }
+
+  readMessage(conversationId : string,messages: Message[],participants :  Participant[]) {
+    for (let i = 0; i < participants.length; i++) {
+      for (let j = 0; j < messages.length; j++) {
+        console.log(participants[i].user.userId + '/' + conversationId + '/' + messages[j].messageId);
+        this.userRef.doc(participants[i].user.userId)
+        .collection('conversations').doc(conversationId)
+        .collection('messages').doc(messages[j].messageId).update('isRead',true);
+      }
+    }
+  }
 
   getParticipants(userId: string, conversationId: string) {
     return this.angularFirestore.collection('users').doc(userId).collection('conversations').doc(conversationId).collection('participants');

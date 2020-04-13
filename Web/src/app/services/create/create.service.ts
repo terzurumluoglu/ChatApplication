@@ -1,13 +1,16 @@
 import { Injectable } from '@angular/core';
 import { ToolService } from '../tool/tool.service';
-import { User, UserModel, Conversation, Participant, ConversationModel, Message, Settings, Device, Avatar } from 'src/app/models/model';
+import { User, Conversation, Participant, ConversationModel, Message, Settings, Avatar } from 'src/app/models/model';
+import * as firebase from 'firebase';
 
 @Injectable({
   providedIn: 'root'
 })
 export class CreateService {
 
-  constructor(private _tool: ToolService) { }
+  firestore = firebase.firestore();
+  constructor(
+    private _tool: ToolService) { }
 
   createSettingData(theme : boolean,alert : boolean,isPrivate : boolean){
     return new Settings(theme,alert,isPrivate);
@@ -25,20 +28,11 @@ export class CreateService {
   createAvatarData(fileName : string,contentType : string, size : number,downloadUrl ?: string) : Avatar{
     const avatar : Avatar = new Avatar(fileName,contentType,size,true,false,null,downloadUrl);
     return avatar;
-    // return {
-    //   avatarName : fileName,
-    //   contentType : contentType,
-    //   size : size,
-    //   isActive : true,
-    //   isDeleted : false,
-    //   deletedTime : null,
-    //   downloadURL : downloadUrl
-    // }
   }
 
-  createConversationData(conversationId : string,sender: User) : Conversation {
+  createConversationData(conversationId : string,user: User) : Conversation {
     let creationTime: number = this._tool.getTime();
-    let conversation: Conversation = new Conversation(conversationId, creationTime, sender, null, false, false, null);
+    let conversation: Conversation = new Conversation(conversationId, creationTime, user, null, false, false, null);
     return conversation;
   }
 
@@ -61,14 +55,16 @@ export class CreateService {
 
   
   createConversation(sender: User, receiver: User): ConversationModel[] {
-    const con1: Conversation = this.createConversationData(null, sender);
-    const part11: Participant = this.createParticipantData(con1.conversationId, null, sender);
-    const part12: Participant = this.createParticipantData(con1.conversationId, null, receiver);
-    const conModel1: ConversationModel = this.createConversationModelData(con1, [part11, part12], []);
-    const con2: Conversation = this.createConversationData(null, receiver);
-    const part21: Participant = this.createParticipantData(con2.conversationId, null, sender);
-    const part22: Participant = this.createParticipantData(con2.conversationId, null, receiver);
-    const conModel2: ConversationModel = this.createConversationModelData(con2, [part21, part22], []);
+    let conversationId : string = this.firestore.collection('users').doc(sender.userId).collection('conversations').doc().id;
+    const con: Conversation = this.createConversationData(conversationId, sender);
+    const partKey1 : string = this.firestore.collection('users').doc(sender.userId).collection('conversations').doc(con.conversationId).collection('participants').doc().id;
+    const partKey2 : string = this.firestore.collection('users').doc(receiver.userId).collection('conversations').doc(con.conversationId).collection('participants').doc().id;
+    const part11: Participant = this.createParticipantData(con.conversationId, partKey1, sender);
+    const part12: Participant = this.createParticipantData(con.conversationId, partKey2, receiver);
+    const conModel1: ConversationModel = this.createConversationModelData(con, [part11, part12], []);
+    const part21: Participant = this.createParticipantData(con.conversationId, partKey1, sender);
+    const part22: Participant = this.createParticipantData(con.conversationId, partKey2, receiver);
+    const conModel2: ConversationModel = this.createConversationModelData(con, [part21, part22], []);
 
     return [conModel1, conModel2];
   }

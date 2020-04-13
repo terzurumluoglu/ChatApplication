@@ -8,7 +8,7 @@ import { LastDataPipe } from 'src/app/pipes/lastData/last-data.pipe';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { ParticipantPipe } from 'src/app/pipes/participant/participant.pipe';
 import { EditProfileComponent } from './edit-profile/edit-profile.component';
-import { ConversationsHasMessagePipe } from 'src/app/pipes/conversations-has-message/conversations-has-message.pipe';
+import { ConversationIsActivePipe } from 'src/app/pipes/conversation-is-active/conversation-is-active.pipe';
 
 @NgModule({
   declarations: [
@@ -17,7 +17,7 @@ import { ConversationsHasMessagePipe } from 'src/app/pipes/conversations-has-mes
     LastDataPipe,
     ParticipantPipe,
     EditProfileComponent,
-    ConversationsHasMessagePipe
+    ConversationIsActivePipe
   ],
   imports: [
     CommonModule,

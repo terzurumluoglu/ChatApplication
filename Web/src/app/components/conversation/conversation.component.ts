@@ -1,17 +1,18 @@
-import { Component, OnInit, HostBinding, ViewChild, ElementRef, OnDestroy } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, OnDestroy, HostListener } from '@angular/core';
 import { UserModel, User, ConversationModel, Conversation, Participant, Message } from 'src/app/models/model';
 import { DatabaseService } from 'src/app/services/firebase/database/database.service';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { AuthService } from 'src/app/services/firebase/auth/auth.service';
-import { Subscription, Observable,fromEvent } from 'rxjs';
+import { Subscription,Observable,fromEvent,timer } from 'rxjs';
 import { FcmService } from 'src/app/services/firebase/fcm/fcm.service';
+
 
 @Component({
   selector: 'app-conversation',
   templateUrl: './conversation.component.html',
-  styleUrls: ['./conversation.component.css'],
+  styleUrls: ['./conversation.component.css']
 })
-export class ConversationComponent implements OnInit,OnDestroy {
+export class ConversationComponent implements OnInit {
 
   @ViewChild('scrollMe') private myScrollContainer: ElementRef;
   pageHeight: number;
@@ -33,8 +34,8 @@ export class ConversationComponent implements OnInit,OnDestroy {
   participantSubs: Subscription;
   messagesSubs: Subscription;
   keyListenerSubscription : Subscription;
-
   message : any;
+
   constructor(
     private formBuilder: FormBuilder,
     private _auth: AuthService,
@@ -44,11 +45,18 @@ export class ConversationComponent implements OnInit,OnDestroy {
     this.currentUserId = _auth.getCurrentUserId();
     this.main();
     this.fcm(this.currentUserId);
+    document.onvisibilitychange = () => {
+      if (_auth.getCurrentUserId()) {
+        if (document.visibilityState === 'hidden') {
+          this._db.updateUserDataByUserId(this.currentUserId,'status','offline');
+        } else {
+          this._db.updateUserDataByUserId(this.currentUserId,'status','online');
+        } 
+      }
+    }
   }
 
   changeTheme(selectedTheme: boolean) {
-    console.log(selectedTheme);
-
     this.theme = selectedTheme;
     this._db.updateUserDataByUserId(this.currentUserId, 'settings.darkTheme', selectedTheme).then(() => {
       // Success
@@ -68,31 +76,51 @@ export class ConversationComponent implements OnInit,OnDestroy {
     });
   }
 
+  getUnReadMessage(messages : Message[]) : Message[]{
+    if (messages && messages.length != 0) {
+      return messages.filter(f => f.isRead == false && f.sender.userId != this.currentUserId);
+    }
+  }
+
+  
+  calculateUnReadMessage(messages : Message[]) : number{
+    const m : Message[] = this.getUnReadMessage(messages);
+    if (m) {
+      return m.length;
+    }
+  }
+
+  readMessage(conversation : ConversationModel){
+    const m : Message[] = this.getUnReadMessage(conversation.messages);
+    this._db.readMessage(conversation.conversation.conversationId,m,conversation.participants);
+  }
+
   ngOnInit(): void {
     console.log('onInit!');
     // User is Online
     this._db.updateUserDataByUserId(this.currentUserId,'status','online');
   }
-
-  ngOnDestroy(){
-    console.log('destroyed!');
-    // User is offline
-    this._db.updateUserDataByUserId(this.currentUserId,'status','offline');
-    this.keyListenerSubscription.unsubscribe();
+  
+  resetTimer() {
+    const time = timer(500);
+    time.subscribe(p => {
+      this.changeParticipantStatus(this.selectedConversation,this.currentUserId,'online');
+    });
   }
 
   keyListener(){
     this.keyListenerSubscription = fromEvent(document, 'keypress').subscribe(e => {
-      console.log('Typing...');
+      this.resetTimer();
+      this.changeParticipantStatus(this.selectedConversation,this.currentUserId,'typing...');
     })
   }
 
   unsubscription(event: any) {
-    console.log(event);
     if (this.userSubs) { this.userSubs.unsubscribe(); }
     if (this.conversationSubs) { this.conversationSubs.unsubscribe(); }
     if (this.participantSubs) { this.participantSubs.unsubscribe(); }
     if (this.messagesSubs) { this.messagesSubs.unsubscribe(); }
+    if (this.keyListenerSubscription) { this.keyListenerSubscription.unsubscribe(); }
   }
 
   main() {
@@ -100,7 +128,6 @@ export class ConversationComponent implements OnInit,OnDestroy {
     this.createForm();
     this.getAllUsers();
     this.getConversation();
-    console.log(this.conversations);
   }
 
   getUser(){
@@ -121,10 +148,16 @@ export class ConversationComponent implements OnInit,OnDestroy {
       let conversation : ConversationModel = new ConversationModel(null,null,null);
       cSnapShot.forEach(element => {
         conversation.conversation = element;
+        this.participantSubs = null;
         this.participantSubs = this._db.getParticipants(this.currentUserId,element.conversationId).valueChanges().subscribe((pSnapShot : Participant[]) => {
           conversation.participants = pSnapShot;
         })
+        this.messagesSubs = null;
         this.messagesSubs = this._db.getMessages(this.currentUserId,element.conversationId).valueChanges().subscribe((mSnapShot : Message[]) => {
+          if (this.selectedConversation && this.selectedConversation.conversation.conversationId === element.conversationId) {
+            console.log('OKUNACAK MESSAGE');
+            this.readMessage(this.selectedConversation);
+          }
           conversation.messages = mSnapShot;
           this.scrollToBottom();
         });
@@ -135,7 +168,6 @@ export class ConversationComponent implements OnInit,OnDestroy {
 
 
   // FORM
-
   createForm() {
     this.messageForm = this.formBuilder.group({
       message: ['', Validators.required]
@@ -156,7 +188,6 @@ export class ConversationComponent implements OnInit,OnDestroy {
         console.log('Message was sent succesfully');
       }).catch(e => {
         this.messageForm.controls.name.setValue(m);
-        console.log(e);
       });
     }
   }
@@ -167,8 +198,14 @@ export class ConversationComponent implements OnInit,OnDestroy {
   selectConversation(conversationId: string) {
     this.selectedConversation = this.conversations.find(c => c.conversation.conversationId == conversationId);
     console.log(this.selectedConversation);
+    this.changeParticipantStatus(this.selectedConversation,this.currentUserId,'online');
+    this.readMessage(this.selectedConversation);
     this.keyListener();
     this.scrollToBottom();
+  }
+
+  changeParticipantStatus(selectedConversation : ConversationModel,userId,status : string){
+    this._db.changeParticipantStatus(selectedConversation,userId,status);
   }
 
   selectUser(user: User) {
@@ -184,7 +221,6 @@ export class ConversationComponent implements OnInit,OnDestroy {
   //RIGHT
   startConversation(selectedUser: User) {
     const con: ConversationModel = this.conversations.find(c => c.participants.find(p => p.user.userId === selectedUser.userId));
-    console.log(con);
     if (con) {
       this.selectedConversation = con;
     } else {
