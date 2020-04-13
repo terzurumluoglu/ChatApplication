@@ -5,7 +5,7 @@ import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { AuthService } from 'src/app/services/firebase/auth/auth.service';
 import { Subscription,Observable,fromEvent,timer } from 'rxjs';
 import { FcmService } from 'src/app/services/firebase/fcm/fcm.service';
-
+import { emptyAvatar } from "src/app/datas/paths";
 
 @Component({
   selector: 'app-conversation',
@@ -27,7 +27,7 @@ export class ConversationComponent implements OnInit {
   isProfileShow: boolean = false;
   theme: boolean = false
   notify: boolean = false;
-  emptyAvatar: string = './assets/dist/media/img/empty-avatar.png';
+  emptyAvatar: string = emptyAvatar;
 
   userSubs: Subscription;
   conversationSubs: Subscription;
@@ -131,6 +131,7 @@ export class ConversationComponent implements OnInit {
   }
 
   getUser(){
+    this.theme = (JSON.parse(localStorage.getItem('user')) as UserModel).user.settings.darkTheme;
     this.userSubs = this._db.getUser(this.currentUserId).valueChanges().subscribe((user : User) => {
       this.user = user;
       this.theme = user.settings.darkTheme;
