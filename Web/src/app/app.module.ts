@@ -15,7 +15,6 @@ import { AngularFireMessagingModule } from 'angularfire2/messaging';
 @NgModule({
   declarations: [
     AppComponent,
-    // COMPONENTS,
   ],
   imports: [
     MODULES,
