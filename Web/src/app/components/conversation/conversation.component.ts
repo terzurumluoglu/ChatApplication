@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ElementRef, OnDestroy, HostListener } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { UserModel, User, ConversationModel, Conversation, Participant, Message } from 'src/app/models/model';
 import { DatabaseService } from 'src/app/services/firebase/database/database.service';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
@@ -34,6 +34,7 @@ export class ConversationComponent implements OnInit {
   participantSubs: Subscription;
   messagesSubs: Subscription;
   keyListenerSubscription : Subscription;
+  subs : Subscription[] = [];
   message : any;
 
   constructor(
@@ -116,6 +117,12 @@ export class ConversationComponent implements OnInit {
   }
 
   unsubscription(event: any) {
+    // console.log(this.subs.length);
+    if (this.subs.length != 0) {
+      this.subs.forEach(element => {
+        element.unsubscribe();
+      });
+    }
     if (this.userSubs) { this.userSubs.unsubscribe(); }
     if (this.conversationSubs) { this.conversationSubs.unsubscribe(); }
     if (this.participantSubs) { this.participantSubs.unsubscribe(); }
@@ -149,24 +156,22 @@ export class ConversationComponent implements OnInit {
       let conversation : ConversationModel = new ConversationModel(null,null,null);
       cSnapShot.forEach(element => {
         conversation.conversation = element;
-        this.participantSubs = null;
         this.participantSubs = this._db.getParticipants(this.currentUserId,element.conversationId).valueChanges().subscribe((pSnapShot : Participant[]) => {
           conversation.participants = pSnapShot;
-        })
-        this.messagesSubs = null;
+        });
+        this.subs.push(this.participantSubs);
         this.messagesSubs = this._db.getMessages(this.currentUserId,element.conversationId).valueChanges().subscribe((mSnapShot : Message[]) => {
           if (this.selectedConversation && this.selectedConversation.conversation.conversationId === element.conversationId) {
-            console.log('OKUNACAK MESSAGE');
             this.readMessage(this.selectedConversation);
           }
           conversation.messages = mSnapShot;
           this.scrollToBottom();
         });
+        this.subs.push(this.messagesSubs);
         this.conversations.push(conversation);
       });
     })
   }
-
 
   // FORM
   createForm() {
