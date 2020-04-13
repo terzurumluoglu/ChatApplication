@@ -41,7 +41,7 @@ export class FcmService {
     this.angularFireAuth.authState.pipe(take(1)).subscribe(
       () => {
         this._db.addDevice(userId,token);
-      })
+      });
   }
 
   /**
@@ -55,7 +55,7 @@ export class FcmService {
         this.addToken(userId, token);
       },
       (err) => {
-        console.error('Unable to get permission to notify.', err);
+        // console.error('Unable to get permission to notify.', err);
       }
     );
   }
@@ -64,7 +64,6 @@ export class FcmService {
    * hook method when new notification received in foreground
    */
   receiveMessage() {
-    console.log('HOP');
     this.angularFireMessaging.messages.subscribe(
       (payload) => {
         console.log("new message received. ", payload);
