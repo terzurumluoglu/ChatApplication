@@ -6,23 +6,22 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { HomeComponent } from './home.component';
 import { LoginComponent } from './membership/login/login.component';
 import { RegisterComponent } from './membership/register/register.component';
+import { LoaderComponent } from '../loader/loader.component';
 
 @NgModule({
   declarations: [
     HomeComponent,
     LoginComponent,
     RegisterComponent,
-    // LoginComponent,
-    // RegisterComponent,
-    // PhoneComponent,
-    // ResetPasswordComponent,
-    // LockScreenComponent,
-    // ConfirmEmailComponent
+    LoaderComponent
   ],
   imports: [
     CommonModule,
     HomeRoutingModule,
     ReactiveFormsModule
+  ],
+  exports : [
+    LoaderComponent
   ]
 })
 

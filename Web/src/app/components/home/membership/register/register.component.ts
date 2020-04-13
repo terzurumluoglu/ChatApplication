@@ -5,6 +5,7 @@ import { DatabaseService } from 'src/app/services/firebase/database/database.ser
 import { AuthService } from 'src/app/services/firebase/auth/auth.service';
 import { Router } from '@angular/router';
 import { User, UserModel } from 'src/app/models/model';
+import { loaderImage } from "src/app/datas/paths";
 
 @Component({
   selector: 'app-register',
@@ -15,6 +16,8 @@ export class RegisterComponent implements OnInit {
 
   title : string = 'Create Account';
   registerForm: FormGroup;
+  loader : boolean = false;
+  image : string = loaderImage;
   constructor(
     private formBuilder: FormBuilder,
     private router : Router,
@@ -31,12 +34,15 @@ export class RegisterComponent implements OnInit {
   get f() { return this.registerForm.controls; }
 
   onSubmit() {
+    this.loader = true;
     this._auth.createUserWithEmailAndPassword(this.f.email.value,this.f.password.value).then(credential => {
       this._db.addUser(this.f.firstname.value, this.f.lastname.value, credential).then((user : User) => {
         localStorage.setItem('user', JSON.stringify(new UserModel(user, [])));
+        this.loader = false;
         this.router.navigate(['/conversation']);
       });
     }).catch(e => {
+      this.loader = false;
       this._error.handleError(e);
     })
   }

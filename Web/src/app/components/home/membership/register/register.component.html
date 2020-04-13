@@ -1,5 +1,6 @@
 <h5 [innerText]="title"></h5>
 
+<app-loader *ngIf="loader" [image]="image"></app-loader>
 <!-- form -->
 <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
     <div class="form-group input-group-lg">

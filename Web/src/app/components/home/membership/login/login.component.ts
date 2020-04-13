@@ -5,6 +5,7 @@ import { DatabaseService } from 'src/app/services/firebase/database/database.ser
 import { Router } from '@angular/router';
 import { ErrorInterceptor } from 'src/app/helpers/error.interceptor';
 import { User, UserModel } from 'src/app/models/model';
+import { loaderImage } from "src/app/datas/paths";
 
 @Component({
   selector: 'app-login',
@@ -15,6 +16,8 @@ export class LoginComponent implements OnInit {
 
   title: string = 'Sign In';
   loginForm: FormGroup;
+  loader : boolean = false;
+  image : string = loaderImage;
   constructor(
     private formBuilder: FormBuilder,
     private router: Router,
@@ -31,23 +34,23 @@ export class LoginComponent implements OnInit {
   get f() { return this.loginForm.controls; }
 
   onSubmit() {
-    console.log('Lütfen Bekleyin...');
+    this.loader = true;
     this._auth.signInWithEmailAndPassword(this.f.email.value, this.f.password.value).then(credential => {
       this._db.getUser(credential.user.uid).get().subscribe((user) => {
         localStorage.setItem('user', JSON.stringify(new UserModel(user.data() as User, [])));
-        console.log('Başarılı!');
+        this.loader = false;
         this.router.navigate(['/conversation']);
       })
     }).catch(e => {
-      console.log('Başarısız!');
+      this.loader = false;
       this._error.handleError(e);
     });
   }
 
   createForm() {
     this.loginForm = this.formBuilder.group({
-      email: ['', Validators.required],
-      password: ['', Validators.required]
+      email: ['', [Validators.required,Validators.email]],
+      password: ['', [Validators.required]]
     });
   }
 }
