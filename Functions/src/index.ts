@@ -1,6 +1,6 @@
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
-import { Message, Device } from './model/model';
+import { Message, Device, Conversation, User, Participant } from './model/model';
 import { findRepeatingElement, createNotificationMessagePayload } from './services/tool';
 admin.initializeApp();
 const _db = admin.firestore();
@@ -83,3 +83,39 @@ export const inComingMessageNotification = functions.firestore
         });
         return Promise.all(tokensToRemove);
     });
+
+export const updateConversationsOwner = functions.firestore.document('users/{userId}').onUpdate(async (snap, context) => {
+    const userId: string = context.params.userId;
+    const user: User = snap.after.data() as User;
+    const userPromise = await userRef.get();
+    userPromise.forEach(async element => {
+        const conRef = userRef.doc(element.id).collection('conversations');
+        const conPromise = await conRef.get()
+        conPromise.forEach(item => {
+            const conversation: Conversation = item.data() as Conversation;
+            if (conversation.owner.userId === userId) {
+                conRef.doc(item.id).update('owner', user).then(() => console.log('BAŞARILI')).catch(e => console.log('HATA'));
+            }
+        });
+    })
+})
+
+export const updateParticipantUser = functions.firestore.document('users/{userId}').onUpdate(async (snap, context) => {
+    const userId: string = context.params.userId;
+    const user: User = snap.after.data() as User;
+    const userPromise = await userRef.get();
+    userPromise.forEach(async element => {
+        const conRef = userRef.doc(element.id).collection('conversations');
+        const conPromise = await conRef.get()
+        conPromise.forEach(async item => {
+            const participRef = conRef.doc(item.id).collection('participants');
+            const participantPromises = await participRef.get();
+            participantPromises.forEach(it => {
+                const participant: Participant = it.data() as Participant;
+                if (participant.user.userId === userId) {
+                    participRef.doc(it.id).update('user', user).then(() => console.log('BAŞARILI')).catch(e => console.log('HATA'));
+                }
+            });
+        });
+    })
+})
