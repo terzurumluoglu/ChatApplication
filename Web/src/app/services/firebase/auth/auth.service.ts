@@ -16,15 +16,15 @@ export class AuthService {
   ) {
     angularFireAuth.authState.subscribe(user => {
       if (user) {
-        localStorage.setItem('userId', btoa(user.uid));
+        localStorage.setItem('userId',user.uid);
       } else {
-        localStorage.setItem('userId', btoa(null));
+        localStorage.removeItem('userId');
       }
     })
   }
 
   getCurrentUserId() {
-    return atob(localStorage.getItem('userId')) ?? null;
+    return localStorage.getItem('userId') ?? null;
   }
 
   get isLoggedIn(): boolean {
@@ -47,6 +47,7 @@ export class AuthService {
     return new Promise((res,rej) => {
       this._db.updateUserDataByUserId(this.getCurrentUserId(),'status','offline').then(() => {
         this.angularFireAuth.auth.signOut().then(() => {
+          localStorage.removeItem('userId');
           res(true);
         }).catch(() => {
           rej('0002'); // Sign out Fail
