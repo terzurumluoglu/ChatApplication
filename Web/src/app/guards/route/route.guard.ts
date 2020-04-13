@@ -16,7 +16,6 @@ export class RouteGuard implements CanActivate {
     state: RouterStateSnapshot): Observable<boolean | UrlTree> | Promise<boolean | UrlTree> | boolean | UrlTree {
       const currentUserId = this._auth.getCurrentUserId();
       if (currentUserId && currentUserId !== 'null') {
-        console.log('if');
         this.router.navigate(['conversation']); 
         return false;
       }else{
