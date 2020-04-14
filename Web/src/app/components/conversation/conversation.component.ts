@@ -153,8 +153,9 @@ export class ConversationComponent implements OnInit {
 
   getConversation(){
     this.conversationSubs = this._db.getConversations(this.currentUserId).valueChanges().subscribe((cSnapShot : Conversation[]) => {
-      let conversation : ConversationModel = new ConversationModel(null,null,null);
+      console.log(cSnapShot);
       cSnapShot.forEach(element => {
+        let conversation : ConversationModel = new ConversationModel(null,null,null);
         conversation.conversation = element;
         this.participantSubs = this._db.getParticipants(this.currentUserId,element.conversationId).valueChanges().subscribe((pSnapShot : Participant[]) => {
           conversation.participants = pSnapShot;
@@ -169,6 +170,7 @@ export class ConversationComponent implements OnInit {
         });
         this.subs.push(this.messagesSubs);
         this.conversations.push(conversation);
+        console.log(this.conversations);
       });
     })
   }

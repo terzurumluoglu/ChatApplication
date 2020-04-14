@@ -6,6 +6,7 @@ import { Router } from '@angular/router';
 import { ErrorInterceptor } from 'src/app/helpers/error.interceptor';
 import { User, UserModel } from 'src/app/models/model';
 import { loaderImage } from "src/app/datas/paths";
+import { googleUser } from "src/app/datas/user.mock";
 
 @Component({
   selector: 'app-login',
@@ -16,8 +17,8 @@ export class LoginComponent implements OnInit {
 
   title: string = 'Sign In';
   loginForm: FormGroup;
-  loader : boolean = false;
-  image : string = loaderImage;
+  loader: boolean = false;
+  image: string = loaderImage;
   constructor(
     private formBuilder: FormBuilder,
     private router: Router,
@@ -30,6 +31,30 @@ export class LoginComponent implements OnInit {
 
   ngOnInit(): void {
   }
+
+  signInWithGoogle() {
+    this.loader = true;
+    this._auth.signInWithGoogle().then(credential => {
+      console.log(credential.user['lastLoginAt']);
+      console.log(credential.user['createdAt']);
+      if (credential.user['lastLoginAt'] === credential.user['createdAt']) {
+        this._db.addUser(credential).then((user: User) => {
+          localStorage.setItem('user', JSON.stringify(new UserModel(user, [])));
+          this.loader = false;
+          this.router.navigate(['/conversation']);
+        });
+      }else{
+        this._db.getUser(credential.user.uid).get().subscribe((user) => {
+          localStorage.setItem('user', JSON.stringify(new UserModel(user.data() as User, [])));
+          this.loader = false;
+          this.router.navigate(['/conversation']);
+        })
+      }
+    }).catch(e => {
+      console.log(e);
+    })
+  }
+  // FORM
 
   get f() { return this.loginForm.controls; }
 
@@ -49,7 +74,7 @@ export class LoginComponent implements OnInit {
 
   createForm() {
     this.loginForm = this.formBuilder.group({
-      email: ['', [Validators.required,Validators.email]],
+      email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required]]
     });
   }

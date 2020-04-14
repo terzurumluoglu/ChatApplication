@@ -56,8 +56,7 @@ export class EditProfileComponent implements OnInit {
   createForm() {
     let filename : string;
     this.profileForm = this.formBuilder.group({
-      firstname: [this.user.firstname, Validators.required],
-      lastname: [this.user.lastname, Validators.required],
+      displayName: [this.user.displayName, Validators.required],
       avatar: [null, [Validators.required]],
       imageValidator: [filename, Validators.required],
       bio: [this.user.bio,[]],
@@ -111,12 +110,8 @@ export class EditProfileComponent implements OnInit {
   createUpdateList() : Update[]{
     
     const datas : Update[] = [];
-    if (this.f.firstname) {
-      const data : Update = new Update('firstname',this.f.firstname.value);
-      datas.push(data);
-    }
-    if (this.f.lastname.valid) {
-      const data : Update = new Update('lastname',this.f.lastname.value);
+    if (this.f.displayName) {
+      const data : Update = new Update('displayName',this.f.displayName.value);
       datas.push(data);
     }
     if (this.f.imageValidator.valid === true) {

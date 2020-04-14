@@ -36,11 +36,12 @@ export class RegisterComponent implements OnInit {
   onSubmit() {
     this.loader = true;
     this._auth.createUserWithEmailAndPassword(this.f.email.value,this.f.password.value).then(credential => {
-      this._db.addUser(this.f.firstname.value, this.f.lastname.value, credential).then((user : User) => {
-        localStorage.setItem('user', JSON.stringify(new UserModel(user, [])));
-        this.loader = false;
-        this.router.navigate(['/conversation']);
-      });
+      console.log(JSON.stringify(credential));
+      // this._db.addUser(this.f.firstname.value, credential).then((user : User) => {
+      //   localStorage.setItem('user', JSON.stringify(new UserModel(user, [])));
+      //   this.loader = false;
+      //   this.router.navigate(['/conversation']);
+      // });
     }).catch(e => {
       this.loader = false;
       this._error.handleError(e);
@@ -49,8 +50,7 @@ export class RegisterComponent implements OnInit {
 
   createForm() {
     this.registerForm = this.formBuilder.group({
-      firstname: ['', Validators.required],
-      lastname: ['', Validators.required],
+      displayName: ['', Validators.required],
       email: ['', Validators.required],
       password: ['', Validators.required],
       passwordVerify: ['', Validators.required]

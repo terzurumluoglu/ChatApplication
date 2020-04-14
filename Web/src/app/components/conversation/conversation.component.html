@@ -99,13 +99,13 @@
                     </form>
                     <div class="sidebar-body">
                         <ul class="list-group list-group-flush" *ngIf="conversations.length != 0">
-                            <li class="list-group-item open-chat" *ngFor="let conversation of conversations | conversationIsActive"
+                            <li [class]="selectedConversation && selectedConversation?.conversation?.conversationId == conversation?.conversation?.conversationId ? 'list-group-item open-chat' : 'list-group-item'" *ngFor="let conversation of conversations | conversationIsActive"
                                 (click)="selectConversation(conversation?.conversation?.conversationId)">
                                 <figure class="avatar avatar-state-success">
                                     <img [src]="(conversation?.participants | participant)?.user?.avatar?.downloadURL || emptyAvatar" class="rounded-circle">
                                 </figure>
                                 <div class="users-list-body" *ngIf="conversation">
-                                    <h5 [innerText]="(conversation?.participants | participant)?.user?.firstname">Patsy
+                                    <h5 [innerText]="(conversation?.participants | participant)?.user?.displayName">Patsy
                                         Paulton</h5>
                                     <!-- <p>Traditional heading elscas sdscsd sdcsdsc</p> -->
                                     <p class="last-message"[innerText]="conversation?.messages | lastData :'messageContent'"></p>
@@ -157,7 +157,7 @@
                                     </figure>
                                 </div>
                                 <div class="users-list-body">
-                                    <h5>{{user?.firstname}} {{user?.lastname}}</h5>
+                                    <h5>{{user?.displayName}}</h5>
                                     <p>{{user?.bio}}</p>
                                     <div class="users-list-action action-toggle">
                                         <div class="dropdown">
@@ -285,7 +285,7 @@
                             <img [src]="(selectedConversation?.participants | participant)?.user?.avatar?.downloadURL || emptyAvatar" class="rounded-circle">
                         </figure>
                         <div>
-                            <h5 [innerText]="(selectedConversation?.participants | participant)?.user?.firstname"></h5>
+                            <h5 [innerText]="(selectedConversation?.participants | participant)?.user?.displayName"></h5>
                             <small class="text-muted">
                                 <i [innerText]="(selectedConversation?.participants | participant)?.status || 'offline'"></i>
                             </small>
@@ -377,7 +377,7 @@
                             <figure class="avatar avatar-xl mb-4">
                                 <img [src]="selectedUser?.avatar?.downloadURL || emptyAvatar" class="rounded-circle">
                             </figure>
-                            <h5 class="text-primary" [innerText]="selectedUser?.firstname + ' ' + selectedUser?.lastname">Frans Hanscombe</h5>
+                            <h5 class="text-primary" [innerText]="selectedUser?.displayName">Frans Hanscombe</h5>
                             <p class="text-muted">Last seen: Today</p>
                         </div>
                         <hr>

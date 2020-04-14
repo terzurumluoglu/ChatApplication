@@ -1,7 +1,6 @@
 export class User {
     userId: string;
-    firstname: string;
-    lastname: string;
+    displayName: string;
     email: string;
     creationTime: number;
     settings: Settings;
@@ -10,10 +9,9 @@ export class User {
     deletedTime: number;
     avatar: Avatar;
     bio: string
-    constructor(userId: string, firstname: string, lastname: string, email: string, creationTime: number, settings: Settings, isActive: boolean, isDeleted: boolean, deletedTime: number, avatar: Avatar, bio: string) {
+    constructor(userId: string, displayName: string,email: string, creationTime: number, settings: Settings, isActive: boolean, isDeleted: boolean, deletedTime: number, avatar: Avatar, bio: string) {
         this.userId = userId;
-        this.firstname = firstname;
-        this.lastname = lastname;
+        this.displayName = displayName;
         this.email = email;
         this.creationTime = creationTime;
         this.settings = settings;

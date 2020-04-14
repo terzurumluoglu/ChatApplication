@@ -43,6 +43,12 @@ export class AuthService {
     return this.angularFireAuth.auth.signInWithEmailAndPassword(email, password);
   }
 
+  signInWithGoogle(){
+    var provider = new firebase.auth.GoogleAuthProvider();
+    // const googleProvider = this.angularFireAuth.auth.pro
+    return this.angularFireAuth.auth.signInWithPopup(provider);
+  }
+
   signOut() {
     return new Promise((res,rej) => {
       this._db.updateUserDataByUserId(this.getCurrentUserId(),'status','offline').then(() => {

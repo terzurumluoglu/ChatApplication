@@ -16,12 +16,22 @@ export class CreateService {
     return new Settings(theme,alert,isPrivate);
   }
 
-  createUserData(firstname: string, lastname: string, userCredential: firebase.auth.UserCredential): User {
+  createUserData(userCredential: firebase.auth.UserCredential,displayName ?: string): User {
     const settings : Settings = this.createSettingData(false,true,true);
     let userId: string = userCredential.user.uid;
     let email : string = userCredential.user.email;
     let creationTime: number = parseInt(userCredential.user.metadata['b']);
-    let user: User = new User(userId, firstname, lastname,email, creationTime, settings, true, false, null,null,null);
+    let fn : string = userCredential.additionalUserInfo.providerId == 'password' ? displayName : userCredential.user.displayName;
+    let avatar : Avatar = userCredential.additionalUserInfo.providerId == 'password' ? null : {
+      avatarName : null,
+      contentType : null,
+      deletedTime : null,
+      size : null,
+      isActive : true,
+      isDeleted : false,
+      downloadURL : userCredential.user.photoURL
+    };
+    let user : User = new User(userId,fn,email,creationTime,settings,true,false,null,avatar,null);
     return user;
   }
 

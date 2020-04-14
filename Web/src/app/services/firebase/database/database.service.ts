@@ -16,34 +16,88 @@ export class DatabaseService {
   // userRef : any = firebase.firestore().collection('users');
   userModel: UserModel;
   constructor(
-    private angularFirestore: AngularFirestore,
+    private afs: AngularFirestore,
     private _create: CreateService,
     private _tool: ToolService) {
   }
 
-
   // REGISTER
-  async addUser(firstname: string, lastname: string, credential: firebase.auth.UserCredential) {
-    const user: User = this._create.createUserData(firstname, lastname, credential);
-    await this.userRef.doc(user.userId).set({
-      userId: user.userId,
-      firstname: user.firstname,
-      lastname: user.lastname,
-      email: user.email,
-      creationTime: user.creationTime,
-      devices: [],
-      settings: {
-        isPrivate: user.settings.isPrivate,
-        darkTheme: user.settings.darkTheme,
-        notify: user.settings.notify
+  async addUser(credential : firebase.auth.UserCredential,displayName ?: string){
+    const user : User = this._create.createUserData(credential,displayName);
+    console.log(user);
+    await this.afs.collection('users').doc(user.userId).set({
+      userId : user.userId,
+      displayName : user.displayName,
+      email : user.email,
+      creationTime : user.creationTime,
+      avatar : {
+        avatarName : user.avatar.avatarName ?? null,
+        contentType : user.avatar.contentType,
+        deletedTime : user.avatar.deletedTime,
+        isActive : user.avatar.isActive,
+        isDeleted : user.avatar.isDeleted,
+        size : user.avatar.size,
+        downloadURL : user.avatar.downloadURL
       },
-      isActive: true,
-      isDeleted: false,
-      deletedTime: null,
-
+      bio : user.bio,
+      deletedTime : user.deletedTime,
+      isActive : user.isActive,
+      isDeleted : user.isDeleted,
+      settings : {
+        darkTheme : user.settings.darkTheme,
+        isPrivate : user.settings.isPrivate,
+        notify : user.settings.notify
+      }
     });
     return user;
   }
+
+  // // REGISTER
+  // async addUser(credential: firebase.auth.UserCredential,firstname: string) {
+  //   const user: User = this._create.createUserData(firstname, credential);
+  //   const a : User = {
+  //     userId: user.userId,
+  //     firstname: user.firstname,
+  //     email: user.email,
+  //     creationTime: user.creationTime,
+  //     settings: {
+  //       isPrivate: user.settings.isPrivate,
+  //       darkTheme: user.settings.darkTheme,
+  //       notify: user.settings.notify
+  //     },
+  //     avatar : {
+  //       avatarName : null,
+  //       contentType : null,
+  //       deletedTime : null,
+  //       isActive : true,
+  //       isDeleted : false,
+  //       size : null,
+  //       downloadURL : credential.user.photoURL
+  //     },
+  //     bio : null,
+  //     isActive: true,
+  //     isDeleted: false,
+  //     deletedTime: null,
+
+  //   }
+  //   await this.userRef.doc(user.userId).set({
+  //     userId: user.userId,
+  //     firstname: user.firstname,
+  //     // lastname: user.lastname,
+  //     email: user.email,
+  //     creationTime: user.creationTime,
+  //     settings: {
+  //       isPrivate: user.settings.isPrivate,
+  //       darkTheme: user.settings.darkTheme,
+  //       notify: user.settings.notify
+  //     },
+  //     isActive: true,
+  //     isDeleted: false,
+  //     deletedTime: null,
+
+  //   });
+  //   return user;
+  // }
 
   updateUserDataByUserId(uid: string, key: string, value: any) {
     return this.userRef.doc(uid).update(key, value);
@@ -87,15 +141,15 @@ export class DatabaseService {
   }
 
   getUser(userId: string) {
-    return this.angularFirestore.collection('users').doc(userId);
+    return this.afs.collection('users').doc(userId);
   }
 
   getAllUsers(){
-    return this.angularFirestore.collection('users');
+    return this.afs.collection('users');
   }
 
   getConversations(userId: string) {
-    return this.angularFirestore.collection('users').doc(userId).collection('conversations',ref=> ref.where('isDeleted','==',false));
+    return this.afs.collection('users').doc(userId).collection('conversations',ref=> ref.where('isDeleted','==',false));
   }
 
   // delete(userId: string){
@@ -116,11 +170,11 @@ export class DatabaseService {
   }
 
   getParticipants(userId: string, conversationId: string) {
-    return this.angularFirestore.collection('users').doc(userId).collection('conversations').doc(conversationId).collection('participants');
+    return this.afs.collection('users').doc(userId).collection('conversations').doc(conversationId).collection('participants');
   }
 
   getMessages(userId: string, conversationId: string) {
-    return this.angularFirestore.collection('users').doc(userId).collection('conversations').doc(conversationId).collection('messages', ref => ref.orderBy('createdTime', 'asc'));
+    return this.afs.collection('users').doc(userId).collection('conversations').doc(conversationId).collection('messages', ref => ref.orderBy('createdTime', 'asc'));
   }
 
   updateConversationDataByConversationId(uid: string, conversationId: string, key: string, value: any) {
