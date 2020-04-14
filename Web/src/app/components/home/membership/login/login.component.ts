@@ -35,9 +35,8 @@ export class LoginComponent implements OnInit {
   signInWithGoogle() {
     this.loader = true;
     this._auth.signInWithGoogle().then(credential => {
-      console.log(credential.user['lastLoginAt']);
-      console.log(credential.user['createdAt']);
-      if (credential.user['lastLoginAt'] === credential.user['createdAt']) {
+      console.log(credential.additionalUserInfo.isNewUser);
+      if (credential.additionalUserInfo.isNewUser === true) {
         this._db.addUser(credential).then((user: User) => {
           localStorage.setItem('user', JSON.stringify(new UserModel(user, [])));
           this.loader = false;
