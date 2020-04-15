@@ -31,3 +31,7 @@ export const createNotificationMessagePayload = function (messageData: Message):
         }
     }
 }
+
+export const getWhiteListURL = function() : string[]{
+    return ['http://localhost:4200','http://localhost:4201'];
+}
