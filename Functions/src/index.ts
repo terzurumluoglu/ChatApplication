@@ -7,6 +7,7 @@ import * as cors from 'cors';
 admin.initializeApp();
 import { WriteConversation } from './services/conversations';
 import { AddParticipantToConversation } from './services/participants';
+import { writeMessage } from './services/messages';
 
 const corsHandler = cors({ origin: getWhiteListURL(), methods: 'GET' });
 
@@ -42,7 +43,7 @@ export const inComingMessageNotification = functions.firestore
         const userId: string = context.params.userId as string;
 
         // Gönderici' nin koleksiyonuna da mesajı yazdığımız için gönderici bilgisi de gelir ama ona bildirim gitmemesi için burada return ediyoruz.
-        if (userId === messageData.sender.userId) {
+        if (userId === messageData.owner.userId) {
             console.log('Mesaj sahibine bildirim gitmez!');
             return 'Owner!';
         }
@@ -135,7 +136,6 @@ export const updateParticipantUser = functions.firestore.document('users/{userId
     })
 });
 
-
 export const createConversation = functions.https.onRequest(async (req, res) => {
     corsHandler(req, res, async () => {
         const ownerId: string = req.query.ownerId;
@@ -177,4 +177,79 @@ export const cloneConversation = functions.firestore.document('users/{userId}/co
                 console.log(e);
             })
     }
+});
+
+export const cloneMessage = functions.firestore.document('users/{userId}/conversations/{conversationId}/messages/{messageId}').onCreate(async (snapshot, context) => {
+    const message: Message = snapshot.data() as Message;
+
+    console.log(message);
+    console.log('part : ' + message.owner.userId);
+
+        userRef.doc(context.params.userId)
+        .collection('conversations').doc(context.params.conversationId)
+        .collection('participants').get().then(async p => {
+            // ADD CONVERSATION
+            p.forEach(async element => {
+                const participant: Participant = element.data() as Participant;
+                if (message.owner.userId !== participant.user.userId) {
+                    await userRef.doc(participant.user.userId)
+                    .collection('conversations').doc(context.params.conversationId)
+                    .collection('messages').doc(message.messageId).set({
+                        conversationId: message.conversationId,
+                        createdTime: message.createdTime,
+                        isActive: message.isActive,
+                        isDeleted: message.isDeleted,
+                        isRead: message.isRead,
+                        isSended: message.isSended,
+                        messageContent: message.messageContent,
+                        messageId: message.messageId,
+                        messageType: message.messageType,
+                        owner: {
+                            userId: message.owner.userId,
+                            email: message.owner.email,
+                            avatar: message.owner.avatar === null ? null : {
+                                avatarName: message.owner.avatar.avatarName,
+                                contentType: message.owner.avatar.contentType,
+                                deletedTime: message.owner.avatar.deletedTime,
+                                isActive: message.owner.avatar.isActive,
+                                isDeleted: message.owner.avatar.isDeleted,
+                                size: message.owner.avatar.size,
+                                downloadURL: message.owner.avatar.downloadURL
+                            },
+                            displayName: message.owner.displayName,
+                            bio: message.owner.bio,
+                            creationTime: message.owner.creationTime,
+                            isActive: message.owner.isActive,
+                            isDeleted: message.owner.isDeleted,
+                            settings: {
+                                darkTheme: message.owner.settings.darkTheme,
+                                isPrivate: message.owner.settings.isPrivate,
+                                notify: message.owner.settings.notify
+                            },
+                            deletedTime: message.owner.deletedTime
+                        },
+                        attachmentThumbUrl: message.attachmentThumbUrl,
+                        attachmentUrl: message.attachmentUrl,
+                        deletedTime: message.deletedTime,
+                    });
+                }
+            });
+        }).catch(e => {
+            console.log(e);
+        })
+
+});
+
+export const sendMessage = functions.https.onRequest(async (req,res) => {
+    corsHandler(req, res, async () => {
+        const ownerId: string = req.query.ownerId;
+        const conversationId : string = req.query.conversationId;
+        const messageContent : string = req.query.messageContent;
+        console.log(req.query);
+        writeMessage(ownerId,conversationId,messageContent,1).then(p => {
+            res.send(p);
+        }).catch(e => {
+            res.status(500).send(e);
+        });
+    })
 })

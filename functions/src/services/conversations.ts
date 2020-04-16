@@ -5,14 +5,14 @@ import { createConversationData, createParticipantData } from "./create";
 const _db = admin.firestore();
 const userRef = _db.collection('users');
 
-export const WriteConversation = function (ownerId: string, userId: string) : Promise<string> {
+export const WriteConversation = function (ownerId: string, userId: string): Promise<string> {
     const ownerConversationRef = userRef.doc(ownerId).collection('conversations');
     const conversationId: string = ownerConversationRef.doc().id;
     const participantRef = ownerConversationRef.doc(conversationId).collection('participants');
     const participantId: string = participantRef.doc().id;
-    return new Promise((res,rej) => {
-        createConversationData(conversationId, ownerId).then((conversation: Conversation ) => {
-            createParticipantData(conversationId, participantId, ownerId).then((participant :Participant) => {
+    return new Promise((res, rej) => {
+        createConversationData(conversationId, ownerId).then((conversation: Conversation) => {
+            createParticipantData(conversationId, participantId, ownerId).then((participant: Participant) => {
                 ownerConversationRef.doc(conversationId).set({
                     conversationId: conversation.conversationId,
                     createdTime: conversation.createdTime,
@@ -87,4 +87,23 @@ export const WriteConversation = function (ownerId: string, userId: string) : Pr
             rej(e);
         })
     });
+}
+
+// export const statusConversation = function (ownerId : string,conversationId : string):Promise<boolean>{
+//     return new Promise((res) => {
+//         userRef.doc(ownerId).collection('conversations').doc(conversationId).get().then(p => {
+//             const con : Conversation = p.data() as Conversation;
+//             res(con.isActive);
+//         }).catch(() => {
+//             res(false);
+//         })
+//     })
+// }
+
+export const ActivateConversation = async function (ownerId: string, conversationId: string) {
+    await userRef.doc(ownerId).collection('conversations').doc(conversationId).update('isActive', true);
+}
+
+export const DeActivateConversation = async function (ownerId: string, conversationId: string) {
+    await userRef.doc(ownerId).collection('conversations').doc(conversationId).update('isActive', false);
 }

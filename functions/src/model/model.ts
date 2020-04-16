@@ -49,9 +49,9 @@ export class Avatar {
     size: number;
     isActive: boolean;
     isDeleted: boolean;
-    deletedTime: number;
+    deletedTime?: number;
     downloadURL?: string;
-    constructor(avatarName: string, contentType: string, size: number, isActive: boolean, isDeleted: boolean, deletedTime: number, downloadURL?: string) {
+    constructor(avatarName: string, contentType: string, size: number, isActive: boolean, isDeleted: boolean, deletedTime?: number, downloadURL?: string) {
         this.avatarName = avatarName
         this.contentType = contentType;
         this.size = size
@@ -59,61 +59,6 @@ export class Avatar {
         this.isDeleted = isDeleted
         this.deletedTime = deletedTime;
         this.downloadURL = downloadURL;
-    }
-}
-
-export class Following {
-    followingId: string;
-    followee: User;
-    ownerId: string;
-    requestTime: number;
-    canFollow: boolean;
-    acceptTime: number;
-    isActive: boolean;
-    constructor(followingId: string, followee: User, ownerId: string, requestTime: number, canFollow: boolean, acceptTime: number, isActive: boolean) {
-        this.followingId = followingId;
-        this.followee = followee;
-        this.ownerId = ownerId;
-        this.requestTime = requestTime;
-        this.canFollow = canFollow;
-        this.acceptTime = acceptTime;
-        this.isActive = isActive;
-    }
-}
-
-export class Follower {
-    followerId: string;
-    follower: User;
-    ownerId: string;
-    requestTime: number;
-    canFollow: boolean;
-    acceptTime: number;
-    isActive: boolean;
-    constructor(followerId: string, follower: User, ownerId: string, requestTime: number, canFollow: boolean, acceptTime: number, isActive: boolean) {
-        this.followerId = followerId;
-        this.follower = follower;
-        this.ownerId = ownerId;
-        this.requestTime = requestTime;
-        this.canFollow = canFollow;
-        this.acceptTime = acceptTime;
-        this.isActive = isActive;
-    }
-}
-
-export class Block {
-    blockId: string;
-    blockedUser: User;
-    ownerId: string;
-    blockedTime: number;
-    liftTime: number;
-    isActive: boolean;
-    constructor(blockId: string, blockedUser: User, ownerId: string, blockedTime: number, liftTime: number, isActive: boolean) {
-        this.blockId = blockId;
-        this.blockedUser = blockedUser;
-        this.ownerId = ownerId;
-        this.blockedTime = blockedTime;
-        this.liftTime = liftTime;
-        this.isActive = isActive;
     }
 }
 
@@ -155,58 +100,29 @@ export class Message {
     messageId: string;
     messageType: number;
     messageContent: string;
-    sender: User;
+    owner: User;
     conversationId: string;
-    attachmentUrl: string;
-    attachmentThumbUrl: string;
     createdTime: number;
     isActive: boolean;
     isDeleted: boolean;
     isRead: boolean;
     isSended: boolean;
+    attachmentUrl?: string;
+    attachmentThumbUrl?: string;
     deletedTime?: number;
-    constructor(messageId: string, messageType: number, messageContent: string, sender: User, conversationId: string, attachmentUrl: string, attachmentThumbUrl: string, createdTime: number, isActive: boolean, isDeleted: boolean, isRead: boolean, isSended: boolean, deletedTime?: number) {
+    constructor(messageId: string, messageType: number, messageContent: string, owner: User, conversationId: string,  createdTime: number, isActive: boolean, isDeleted: boolean, isRead: boolean, isSended: boolean,attachmentUrl?: string, attachmentThumbUrl?: string, deletedTime?: number) {
         this.messageId = messageId;
         this.messageType = messageType;
         this.messageContent = messageContent;
-        this.sender = sender;
+        this.owner = owner;
         this.conversationId = conversationId;
-        this.attachmentUrl = attachmentUrl;
-        this.attachmentThumbUrl = attachmentThumbUrl;
         this.createdTime = createdTime;
         this.isActive = isActive;
         this.isDeleted = isDeleted;
         this.isRead = isRead;
         this.isSended = isSended;
+        this.attachmentUrl = attachmentUrl;
+        this.attachmentThumbUrl = attachmentThumbUrl;
         this.deletedTime = deletedTime;
-    }
-}
-
-export class ConversationModel {
-    conversation: Conversation;
-    participants: Participant[];
-    messages: Message[]
-    constructor(conversation: Conversation, participants: Participant[], messages: Message[]) {
-        this.conversation = conversation;
-        this.participants = participants;
-        this.messages = messages;
-    }
-}
-
-export class UserModel {
-    user: User;
-    conversations: ConversationModel[];
-    constructor(user: User, conversations: ConversationModel[]) {
-        this.user = user;
-        this.conversations = conversations;
-    }
-}
-
-export class Update {
-    key: string;
-    value: any;
-    constructor(key: string, value: any) {
-        this.key = key;
-        this.value = value;
     }
 }
