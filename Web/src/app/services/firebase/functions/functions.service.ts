@@ -26,10 +26,14 @@ export class FunctionsService {
     private _error : ErrorInterceptor
   ) { }
 
+  headers() : HttpHeaders{
+    return new HttpHeaders().set('Content-Type', 'application/json');
+  }
+
   createConversation(ownerId: string, userId: string) {
     const url : string = this.apiUrl + this.pathCreateConversation;
     const params = new HttpParams().set('ownerId', ownerId).set('userId', userId);
-    const headers = new HttpHeaders().set('Content-Type', 'application/json');
+    const headers = this.headers();
     return this.http.get(url, { params, headers,responseType: 'text' }).pipe(catchError(this._error.handleError));
   }
 
