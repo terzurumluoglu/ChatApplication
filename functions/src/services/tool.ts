@@ -1,23 +1,7 @@
 
-import { Device, Message } from '../model/model';
+import { Message } from '../model/model';
 import * as admin from 'firebase-admin';
 
-// Bu metot user ın bütün device tokenlarını alır çoklanmış olanların tekilleştirir ve diğerlerinin indexlerini silinmek üzere ayırır.
-export const findRepeatingElement = function (array: Device[]): any[][] {
-    const temp: any = {};
-    const deleteTokensIndexes: any[] = [];
-    const inUseTokens: any[] = [];
-    for (let i = 0; i < array.length; i++) {
-        if (temp[array[i].token]) {
-            deleteTokensIndexes.push(i);
-        }
-        temp[array[i].token] = true;
-    }
-    for (const k in temp) {
-        inUseTokens.push(array.find(f => f.token === k));
-    }
-    return [inUseTokens, deleteTokensIndexes];
-}
 
 export const createNotificationMessagePayload = function (messageData: Message): admin.messaging.MessagingPayload {
     return {
@@ -32,6 +16,12 @@ export const createNotificationMessagePayload = function (messageData: Message):
     }
 }
 
-export const getWhiteListURL = function() : string[]{
-    return ['http://localhost:4200','http://localhost:4201'];
+export const getWhiteListURL = function (): string[] {
+    return ['http://localhost:4200', 'http://localhost:4201'];
+}
+
+export const getTime = function (): number {
+    const timestamp = admin.firestore.Timestamp.now();
+    const timeNow: number = timestamp.seconds * 1000 + timestamp.nanoseconds / 1000000;
+    return timeNow;
 }
