@@ -237,7 +237,6 @@ export const cloneMessage = functions.firestore.document('users/{userId}/convers
         }).catch(e => {
             console.log(e);
         })
-
 });
 
 export const sendMessage = functions.https.onRequest(async (req,res) => {

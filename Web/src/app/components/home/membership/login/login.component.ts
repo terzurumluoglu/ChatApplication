@@ -6,7 +6,6 @@ import { Router } from '@angular/router';
 import { ErrorInterceptor } from 'src/app/helpers/error.interceptor';
 import { User, UserModel } from 'src/app/models/model';
 import { loaderImage } from "src/app/datas/paths";
-import { googleUser } from "src/app/datas/user.mock";
 
 @Component({
   selector: 'app-login',
@@ -35,7 +34,7 @@ export class LoginComponent implements OnInit {
   signInWithGoogle() {
     this.loader = true;
     this._auth.signInWithGoogle().then(credential => {
-      console.log(credential.additionalUserInfo.isNewUser);
+      localStorage.setItem('userId',credential.user.uid);
       if (credential.additionalUserInfo.isNewUser === true) {
         this._db.addUser(credential).then((user: User) => {
           localStorage.setItem('user', JSON.stringify(new UserModel(user, [])));
@@ -50,6 +49,7 @@ export class LoginComponent implements OnInit {
         })
       }
     }).catch(e => {
+      this.loader = false;
       console.log(e);
     })
   }

@@ -12,7 +12,8 @@ export class ErrorInterceptor implements HttpInterceptor {
 
   constructor(private _toast : ToastService) { }
   handleError(error: HttpErrorResponse) {
-    this._toast.danger(error.name,error.message);
+    console.log('HOP');
+    // this._toast.danger(error.name,error.message);
     return throwError(error);
   }
 

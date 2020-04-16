@@ -31,7 +31,7 @@ export class CreateService {
       isDeleted : false,
       downloadURL : userCredential.user.photoURL
     };
-    let user : User = new User(userId,fn,email,creationTime,settings,true,false,null,avatar,null);
+    let user : User = new User(userId,fn,email,creationTime,settings,true,false,avatar,null);
     return user;
   }
 
@@ -42,7 +42,7 @@ export class CreateService {
 
   createConversationData(conversationId : string,user: User) : Conversation {
     let creationTime: number = this._tool.getTime();
-    let conversation: Conversation = new Conversation(conversationId, creationTime, user, null, false, false, null);
+    let conversation: Conversation = new Conversation(conversationId, creationTime, user,false,false);
     return conversation;
   }
 
@@ -57,26 +57,26 @@ export class CreateService {
     return conversationModel;
   }
 
-  createMessageData(messageContent : string,sender : User,conversationId : string,attachmentUrl : string,attachmentThumbUrl : string){
+  createMessageData(messageContent : string,owner : User,conversationId : string,attachmentUrl : string,attachmentThumbUrl : string){
     const creationTime : number = this._tool.getTime();
-    const message : Message = new Message(null,1,messageContent,sender,conversationId,attachmentUrl,attachmentThumbUrl,creationTime,null,true,false,false,false);
+    const message : Message = new Message(null,1,messageContent,owner,conversationId,attachmentUrl,attachmentThumbUrl,creationTime,true,false,false,false);
     return message;
   }
 
   
-  createConversation(sender: User, receiver: User): ConversationModel[] {
-    let conversationId : string = this.firestore.collection('users').doc(sender.userId).collection('conversations').doc().id;
-    const con: Conversation = this.createConversationData(conversationId, sender);
-    const partKey1 : string = this.firestore.collection('users').doc(sender.userId).collection('conversations').doc(con.conversationId).collection('participants').doc().id;
-    const partKey2 : string = this.firestore.collection('users').doc(receiver.userId).collection('conversations').doc(con.conversationId).collection('participants').doc().id;
-    const part11: Participant = this.createParticipantData(con.conversationId, partKey1, sender);
-    const part12: Participant = this.createParticipantData(con.conversationId, partKey2, receiver);
-    const conModel1: ConversationModel = this.createConversationModelData(con, [part11, part12], []);
-    const part21: Participant = this.createParticipantData(con.conversationId, partKey1, sender);
-    const part22: Participant = this.createParticipantData(con.conversationId, partKey2, receiver);
-    const conModel2: ConversationModel = this.createConversationModelData(con, [part21, part22], []);
+  // createConversation(owner: User, receiver: User): ConversationModel[] {
+  //   let conversationId : string = this.firestore.collection('users').doc(owner.userId).collection('conversations').doc().id;
+  //   const con: Conversation = this.createConversationData(conversationId, owner);
+  //   const partKey1 : string = this.firestore.collection('users').doc(owner.userId).collection('conversations').doc(con.conversationId).collection('participants').doc().id;
+  //   const partKey2 : string = this.firestore.collection('users').doc(receiver.userId).collection('conversations').doc(con.conversationId).collection('participants').doc().id;
+  //   const part11: Participant = this.createParticipantData(con.conversationId, partKey1, owner);
+  //   const part12: Participant = this.createParticipantData(con.conversationId, partKey2, receiver);
+  //   const conModel1: ConversationModel = this.createConversationModelData(con, [part11, part12], []);
+  //   const part21: Participant = this.createParticipantData(con.conversationId, partKey1, seownernder);
+  //   const part22: Participant = this.createParticipantData(con.conversationId, partKey2, receiver);
+  //   const conModel2: ConversationModel = this.createConversationModelData(con, [part21, part22], []);
 
-    return [conModel1, conModel2];
-  }
+  //   return [conModel1, conModel2];
+  // }
 
 }

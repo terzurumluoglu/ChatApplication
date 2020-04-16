@@ -6,6 +6,7 @@ import { AuthService } from 'src/app/services/firebase/auth/auth.service';
 import { Subscription,Observable,fromEvent,timer } from 'rxjs';
 import { FcmService } from 'src/app/services/firebase/fcm/fcm.service';
 import { emptyAvatar } from "src/app/datas/paths";
+import { FunctionsService } from 'src/app/services/firebase/functions/functions.service';
 
 @Component({
   selector: 'app-conversation',
@@ -41,7 +42,8 @@ export class ConversationComponent implements OnInit {
     private formBuilder: FormBuilder,
     private _auth: AuthService,
     private _db: DatabaseService,
-    private _fcm : FcmService
+    private _fcm : FcmService,
+    private _functions : FunctionsService
   ) {
     this.currentUserId = _auth.getCurrentUserId();
     this.main();
@@ -79,7 +81,7 @@ export class ConversationComponent implements OnInit {
 
   getUnReadMessage(messages : Message[]) : Message[]{
     if (messages && messages.length != 0) {
-      return messages.filter(f => f.isRead == false && f.sender.userId != this.currentUserId);
+      return messages.filter(f => f.isRead == false && f.owner.userId != this.currentUserId);
     }
   }
 
@@ -153,7 +155,8 @@ export class ConversationComponent implements OnInit {
 
   getConversation(){
     this.conversationSubs = this._db.getConversations(this.currentUserId).valueChanges().subscribe((cSnapShot : Conversation[]) => {
-      console.log(cSnapShot);
+      const cons : ConversationModel[] = [];
+      // console.log(cSnapShot);
       cSnapShot.forEach(element => {
         let conversation : ConversationModel = new ConversationModel(null,null,null);
         conversation.conversation = element;
@@ -162,16 +165,22 @@ export class ConversationComponent implements OnInit {
         });
         this.subs.push(this.participantSubs);
         this.messagesSubs = this._db.getMessages(this.currentUserId,element.conversationId).valueChanges().subscribe((mSnapShot : Message[]) => {
+          conversation.messages = mSnapShot;
           if (this.selectedConversation && this.selectedConversation.conversation.conversationId === element.conversationId) {
+            const len : number = this.selectedConversation.messages.length >= mSnapShot.length ? this.selectedConversation.messages.length : mSnapShot.length;
+            for (let i = 0; i < len; i++) {
+              this.selectedConversation.messages[i] = mSnapShot[i];
+            }
+            this.scrollToBottom();
             this.readMessage(this.selectedConversation);
           }
-          conversation.messages = mSnapShot;
-          this.scrollToBottom();
         });
         this.subs.push(this.messagesSubs);
-        this.conversations.push(conversation);
-        console.log(this.conversations);
+        cons.push(conversation);
+        // console.log(cons);
       });
+      this.conversations = cons;
+      // console.log(this.conversations);
     })
   }
 
@@ -192,11 +201,12 @@ export class ConversationComponent implements OnInit {
       const m: string = this.f.message.value;
       this.messageForm.reset();
       const receiver: User = this.selectedConversation.participants.find(p => p.user.userId != this.currentUserId).user;
-      this._db.sendMessage(m, this.selectedConversation, this.user, receiver).then(() => {
-        console.log('Message was sent succesfully');
-      }).catch(e => {
-        this.messageForm.controls.name.setValue(m);
-      });
+      this._functions.sendMessage();
+      // this._db.sendMessage(m, this.selectedConversation, this.user, receiver).then(() => {
+      //   console.log('Message was sent succesfully');
+      // }).catch(e => {
+      //   this.messageForm.controls.name.setValue(m);
+      // });
     }
   }
 
@@ -227,14 +237,51 @@ export class ConversationComponent implements OnInit {
   }
 
   //RIGHT
-  startConversation(selectedUser: User) {
-    const con: ConversationModel = this.conversations.find(c => c.participants.find(p => p.user.userId === selectedUser.userId));
-    if (con) {
-      this.selectedConversation = con;
-    } else {
-      this.selectedConversation = this._db.startConversation(this.user, selectedUser);
-    }
+
+  startConversation(selectedUser: User){
+    this._functions.createConversation(this.currentUserId,selectedUser.userId).subscribe((p : string) => {
+      console.log(p);
+      this.selectedConversation = this.conversations.find(i => i.conversation.conversationId = p);
+      console.log(this.selectedConversation);
+    },
+      (error) => {
+        console.log(error);
+      },
+      () => {
+        console.error('Request completed'); 
+      }
+    )
+    // .subscribe(
+    //   (response) => {                           //next() callback
+    //     console.log('response received');
+    //     console.log(response);
+    //   },
+    //   (error) => {                              //error() callback
+    //     console.error('Request failed with error');
+
+    //   },
+    //   () => {                                   //complete() callback
+    //     console.error('Request completed');      //This is actually not needed 
+
+    //   })
+    // const con: ConversationModel = this.conversations.find(c => c.participants.find(p => p.user.userId === selectedUser.userId));
+    // if (con) {
+    //   this.selectedConversation = con;
+    // }else{
+    //   this._functions.createConversation(this.currentUserId,selectedUser.userId).subscribe((p) => {
+    //     console.log(p);
+    //   })
+    // }
   }
+
+  // startConversation(selectedUser: User) {
+  //   const con: ConversationModel = this.conversations.find(c => c.participants.find(p => p.user.userId === selectedUser.userId));
+  //   if (con) {
+  //     this.selectedConversation = con;
+  //   } else {
+  //     this.selectedConversation = this._db.startConversation(this.user, selectedUser);
+  //   }
+  // }
 
   scrollToBottom(): void {
     setTimeout(() => {

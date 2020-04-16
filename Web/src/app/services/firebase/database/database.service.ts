@@ -21,6 +21,24 @@ export class DatabaseService {
     private _tool: ToolService) {
   }
 
+  deleteConversationAndParticipant(){
+    this.userRef.get().then(p => {
+      p.forEach(element => {
+       const user : User = element.data() as User;
+       this.userRef.doc(user.userId).collection('conversations').get().then(a => {
+         a.forEach(item => {
+           this.userRef.doc(user.userId).collection('conversations').doc(item.data().conversationId).collection('participants').get().then(b => {
+            b.forEach(it => {
+              this.userRef.doc(user.userId).collection('conversations').doc(item.data().conversationId).collection('participants').doc(it.data().participantId).delete();
+            });
+            this.userRef.doc(user.userId).collection('conversations').doc(item.data().conversationId).delete();
+           })
+         });
+       }) 
+      });
+    })
+  }
+
   // REGISTER
   async addUser(credential : firebase.auth.UserCredential,displayName ?: string){
     const user : User = this._create.createUserData(credential,displayName);
@@ -30,8 +48,8 @@ export class DatabaseService {
       displayName : user.displayName,
       email : user.email,
       creationTime : user.creationTime,
-      avatar : {
-        avatarName : user.avatar.avatarName ?? null,
+      avatar : user.avatar === null ? null : {
+        avatarName : user.avatar.avatarName,
         contentType : user.avatar.contentType,
         deletedTime : user.avatar.deletedTime,
         isActive : user.avatar.isActive,
@@ -124,21 +142,21 @@ export class DatabaseService {
     return this.updateUserDataByUserId(uid, 'avatar', (Object.assign({}, data)));
   }
 
-  startConversation(sender: User, receiver: User): ConversationModel {
-    const datas: ConversationModel[] = this._create.createConversation(sender, receiver);
-    let senderConRef = this.userRef.doc(sender.userId).collection('conversations');
-    let receiverConRef = this.userRef.doc(receiver.userId).collection('conversations');
-    const refS: firebase.firestore.CollectionReference<firebase.firestore.DocumentData>[] = [senderConRef, receiverConRef];
-    for (let i = 0; i < datas.length; i++) {
-      let conRef = refS[i];
-      conRef.doc(datas[i].conversation.conversationId).set(Object.assign({}, datas[i].conversation));
-      datas[i].participants.forEach(element => {
-        let partRef = conRef.doc(datas[i].conversation.conversationId).collection('participants');
-        partRef.doc(element.participantId).set(Object.assign({}, element));
-      });
-    }
-    return datas[0];
-  }
+  // startConversation(sender: User, receiver: User): ConversationModel {
+  //   const datas: ConversationModel[] = this._create.createConversation(sender, receiver);
+  //   let senderConRef = this.userRef.doc(sender.userId).collection('conversations');
+  //   let receiverConRef = this.userRef.doc(receiver.userId).collection('conversations');
+  //   const refS: firebase.firestore.CollectionReference<firebase.firestore.DocumentData>[] = [senderConRef, receiverConRef];
+  //   for (let i = 0; i < datas.length; i++) {
+  //     let conRef = refS[i];
+  //     conRef.doc(datas[i].conversation.conversationId).set(Object.assign({}, datas[i].conversation));
+  //     datas[i].participants.forEach(element => {
+  //       let partRef = conRef.doc(datas[i].conversation.conversationId).collection('participants');
+  //       partRef.doc(element.participantId).set(Object.assign({}, element));
+  //     });
+  //   }
+  //   return datas[0];
+  // }
 
   getUser(userId: string) {
     return this.afs.collection('users').doc(userId);
@@ -181,16 +199,16 @@ export class DatabaseService {
     return this.userRef.doc(uid).collection('conversations').doc(conversationId).update(key, value);
   }
 
-  sendMessage(messageContent: string, conversation: ConversationModel, sender: User, receiver: User) {
-    const message: Message = this._create.createMessageData(messageContent, sender, conversation.conversation.conversationId, null, null);
-    if (conversation.conversation.isActive === false) {
-      this.updateConversationDataByConversationId(sender.userId, conversation.conversation.conversationId, 'isActive', true);
-      this.updateConversationDataByConversationId(receiver.userId, conversation.conversation.conversationId, 'isActive', true);
-    }
-    var senderMessageRef = this.userRef.doc(sender.userId).collection('conversations').doc(conversation.conversation.conversationId).collection('messages');
-    var receiverMessageRef = this.userRef.doc(receiver.userId).collection('conversations').doc(conversation.conversation.conversationId).collection('messages');
-    const key: string = senderMessageRef.doc().id;
-    message.messageId = key;
-    return Promise.all([senderMessageRef.doc(key).set(Object.assign({}, message)), receiverMessageRef.doc(key).set(Object.assign({}, message))]);
-  }
+  // sendMessage(messageContent: string, conversation: ConversationModel, owner: User, receiver: User) {
+  //   const message: Message = this._create.createMessageData(messageContent, owner, conversation.conversation.conversationId, null, null);
+  //   if (conversation.conversation.isActive === false) {
+  //     this.updateConversationDataByConversationId(owner.userId, conversation.conversation.conversationId, 'isActive', true);
+  //     this.updateConversationDataByConversationId(receiver.userId, conversation.conversation.conversationId, 'isActive', true);
+  //   }
+  //   var senderMessageRef = this.userRef.doc(owner.userId).collection('conversations').doc(conversation.conversation.conversationId).collection('messages');
+  //   var receiverMessageRef = this.userRef.doc(receiver.userId).collection('conversations').doc(conversation.conversation.conversationId).collection('messages');
+  //   const key: string = senderMessageRef.doc().id;
+  //   message.messageId = key;
+  //   return Promise.all([senderMessageRef.doc(key).set(Object.assign({}, message)), receiverMessageRef.doc(key).set(Object.assign({}, message))]);
+  // }
 }

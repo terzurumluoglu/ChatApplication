@@ -6,10 +6,10 @@ export class User {
     settings: Settings;
     isActive: boolean;
     isDeleted: boolean;
-    deletedTime: number;
     avatar: Avatar;
-    bio: string
-    constructor(userId: string, displayName: string,email: string, creationTime: number, settings: Settings, isActive: boolean, isDeleted: boolean, deletedTime: number, avatar: Avatar, bio: string) {
+    bio: string;
+    deletedTime?: number;
+    constructor(userId: string, displayName: string,email: string, creationTime: number, settings: Settings, isActive: boolean, isDeleted: boolean, avatar: Avatar, bio: string,deletedTime?: number) {
         this.userId = userId;
         this.displayName = displayName;
         this.email = email;
@@ -17,9 +17,9 @@ export class User {
         this.settings = settings;
         this.isActive = isActive;
         this.isDeleted = isDeleted;
-        this.deletedTime = deletedTime;
         this.avatar = avatar;
         this.bio = bio;
+        this.deletedTime = deletedTime;
     }
 }
 
@@ -121,18 +121,18 @@ export class Conversation {
     conversationId: string;
     createdTime: number;
     owner: User;
-    deletedTime: number;
     isActive: boolean;
     isDeleted: boolean;
-    title: string;
-    constructor(conversationId: string, createdTime: number, owner: User, deletedTime: number, isActive: boolean, isDeleted: boolean, title: string) {
+    title?: string;
+    deletedTime?: number;
+    constructor(conversationId: string, createdTime: number, owner: User, isActive: boolean, isDeleted: boolean, title?: string, deletedTime?: number) {
         this.conversationId = conversationId;
         this.createdTime = createdTime;
         this.owner = owner;
-        this.deletedTime = deletedTime;
         this.isActive = isActive;
         this.isDeleted = isDeleted;
         this.title = title;
+        this.deletedTime = deletedTime;
     }
 }
 
@@ -157,30 +157,30 @@ export class Message {
     messageId: string;
     messageType: number;
     messageContent: string;
-    sender: User;
+    owner: User;
     conversationId: string;
     attachmentUrl: string;
     attachmentThumbUrl: string;
     createdTime: number;
-    deletedTime: number;
     isActive: boolean;
     isDeleted: boolean;
     isRead: boolean;
     isSended: boolean;
-    constructor(messageId: string, messageType: number, messageContent: string, sender: User, conversationId: string, attachmentUrl: string, attachmentThumbUrl: string, createdTime: number, deletedTime: number, isActive: boolean, isDeleted: boolean, isRead: boolean, isSended: boolean) {
+    deletedTime?: number;
+    constructor(messageId: string, messageType: number, messageContent: string, owner: User, conversationId: string, attachmentUrl: string, attachmentThumbUrl: string, createdTime: number, isActive: boolean, isDeleted: boolean, isRead: boolean, isSended: boolean, deletedTime?: number) {
         this.messageId = messageId;
         this.messageType = messageType;
         this.messageContent = messageContent;
-        this.sender = sender;
+        this.owner = owner;
         this.conversationId = conversationId;
         this.attachmentUrl = attachmentUrl;
         this.attachmentThumbUrl = attachmentThumbUrl;
         this.createdTime = createdTime;
-        this.deletedTime = deletedTime;
         this.isActive = isActive;
         this.isDeleted = isDeleted;
         this.isRead = isRead;
         this.isSended = isSended;
+        this.deletedTime = deletedTime;
     }
 }
 

@@ -32,6 +32,8 @@ export class EditProfileComponent implements OnInit {
     this.main();
   }
   ngOnInit(): void {
+    // console.log('WORKED');
+    // this._db.deleteConversationAndParticipant();
   }
 
   main(){

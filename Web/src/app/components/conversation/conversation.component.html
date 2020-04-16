@@ -327,14 +327,14 @@
                             </div>
                             -->
                     <div class="messages">
-                        <div [class]="user?.userId == message?.sender?.userId ? 'message-item outgoing-message' : 'message-item '"
+                        <div [class]="user?.userId == message?.owner?.userId ? 'message-item outgoing-message' : 'message-item '"
                             *ngFor="let message of selectedConversation?.messages">
                             <div class="message-content">
                                 {{message?.messageContent}}
                             </div>
                             <div class="message-action">
                                 {{message?.createdTime | date : 'd/M/yy, h:mm a'}}
-                                <i [ngClass]="message?.isRead ? 'ti-double-check color-read' : (message?.isSended ? 'ti-double-check' : 'ti-time')" *ngIf="user?.userId == message?.sender?.userId"></i>
+                                <i [ngClass]="message?.isRead ? 'ti-double-check color-read' : (message?.isSended ? 'ti-double-check' : 'ti-time')" *ngIf="user?.userId == message?.owner?.userId"></i>
                             </div>
                         </div>
                     </div>
