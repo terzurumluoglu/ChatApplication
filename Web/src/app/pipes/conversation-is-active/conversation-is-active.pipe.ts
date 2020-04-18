@@ -7,7 +7,6 @@ import { ConversationModel } from 'src/app/models/model';
 export class ConversationIsActivePipe implements PipeTransform {
 
   transform(datas : ConversationModel[]) {
-    let d = datas.filter(p => p.conversation.isActive === true);
-    return d
+    return datas.filter(f => f?.messages?.length != 0);
   }
 }

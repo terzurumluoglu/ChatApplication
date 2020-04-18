@@ -1,11 +1,8 @@
-import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
-import { UserModel, User, ConversationModel, Conversation, Participant, Message } from 'src/app/models/model';
+import { Component, OnInit, Input } from '@angular/core';
+import { User, ConversationModel, Participant } from 'src/app/models/model';
 import { DatabaseService } from 'src/app/services/firebase/database/database.service';
-import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { AuthService } from 'src/app/services/firebase/auth/auth.service';
-import { Subscription,Observable,fromEvent,timer } from 'rxjs';
 import { FcmService } from 'src/app/services/firebase/fcm/fcm.service';
-import { emptyAvatar } from "src/app/datas/paths";
 import { FunctionsService } from 'src/app/services/firebase/functions/functions.service';
 
 @Component({
@@ -14,32 +11,16 @@ import { FunctionsService } from 'src/app/services/firebase/functions/functions.
   styleUrls: ['./conversation.component.css']
 })
 export class ConversationComponent implements OnInit {
-
-  @ViewChild('scrollMe') private myScrollContainer: ElementRef;
-  pageHeight: number;
+  
   user : User;
-  users: Observable<User[]>;
-  conversations : ConversationModel[] = [];
-  hasConversation: boolean = true;
-  selectedConversation: ConversationModel;
-  selectedUser: User;
-  messageForm: FormGroup;
+
+  theme : boolean = true;
   currentUserId: string;
-  isProfileShow: boolean = false;
-  theme: boolean = false
-  notify: boolean = false;
-  emptyAvatar: string = emptyAvatar;
-
-  userSubs: Subscription;
-  conversationSubs: Subscription;
-  participantSubs: Subscription;
-  messagesSubs: Subscription;
-  keyListenerSubscription : Subscription;
-  subs : Subscription[] = [];
   message : any;
-
+  selectedConversationInputParent : string;
+  selectedUserInputParent : string;
+  participantsInputParent : Participant[];
   constructor(
-    private formBuilder: FormBuilder,
     private _auth: AuthService,
     private _db: DatabaseService,
     private _fcm : FcmService,
@@ -47,9 +28,41 @@ export class ConversationComponent implements OnInit {
   ) {
     this.currentUserId = _auth.getCurrentUserId();
     this.main();
-    this.fcm(this.currentUserId);
+    this.fcm();
+    this.updateStatus();
+  }
+
+  selectedConversation(selectedConversationId : string){
+    this.selectedConversationInputParent = selectedConversationId;
+  }
+
+  selectedConversationProfile(selectedConversationId : string){
+    this.selectedConversationInputParent = selectedConversationId;
+  }
+
+  selectedUser(selectedUserId : string){
+    this.selectedUserInputParent = selectedUserId;
+  }
+
+  sendParticipants(participants : Participant[]){
+    this.participantsInputParent = participants;
+  }
+
+  ngOnInit(): void {
+    console.log('onInit!');
+    // User is Online
+    this._db.updateUserDataByUserId(this.currentUserId,'status','online');
+  }
+  
+  unsubscription(event: any) {
+  }
+
+  main() {
+  }
+
+  updateStatus(){
     document.onvisibilitychange = () => {
-      if (_auth.getCurrentUserId()) {
+      if (this._auth.getCurrentUserId()) {
         if (document.visibilityState === 'hidden') {
           this._db.updateUserDataByUserId(this.currentUserId,'status','offline');
         } else {
@@ -59,245 +72,12 @@ export class ConversationComponent implements OnInit {
     }
   }
 
-  changeTheme(selectedTheme: boolean) {
-    this.theme = selectedTheme;
-    this._db.updateUserDataByUserId(this.currentUserId, 'settings.darkTheme', selectedTheme).then(() => {
-      // Success
-    }).catch(e => {
-      // Fail      
-      this.theme = !selectedTheme;
-    });
-  }
-
-  changeNotify(selectedNotify: boolean) {
-    this.notify = selectedNotify;
-    this._db.updateUserDataByUserId(this.currentUserId, 'settings.notify', selectedNotify).then(() => {
-      // Success
-    }).catch(e => {
-      // Fail
-      this.notify = !selectedNotify;
-    });
-  }
-
-  getUnReadMessage(messages : Message[]) : Message[]{
-    if (messages && messages.length != 0) {
-      return messages.filter(f => f.isRead == false && f.owner.userId != this.currentUserId);
-    }
-  }
-
-  
-  calculateUnReadMessage(messages : Message[]) : number{
-    const m : Message[] = this.getUnReadMessage(messages);
-    if (m) {
-      return m.length;
-    }
-  }
-
-  readMessage(conversation : ConversationModel){
-    const m : Message[] = this.getUnReadMessage(conversation.messages);
-    this._db.readMessage(conversation.conversation.conversationId,m,conversation.participants);
-  }
-
-  ngOnInit(): void {
-    console.log('onInit!');
-    // User is Online
-    this._db.updateUserDataByUserId(this.currentUserId,'status','online');
-  }
-  
-  resetTimer() {
-    const time = timer(500);
-    time.subscribe(p => {
-      this.changeParticipantStatus(this.selectedConversation,this.currentUserId,'online');
-    });
-  }
-
-  keyListener(){
-    this.keyListenerSubscription = fromEvent(document, 'keypress').subscribe(e => {
-      this.resetTimer();
-      this.changeParticipantStatus(this.selectedConversation,this.currentUserId,'typing...');
-    })
-  }
-
-  unsubscription(event: any) {
-    // console.log(this.subs.length);
-    if (this.subs.length != 0) {
-      this.subs.forEach(element => {
-        element.unsubscribe();
-      });
-    }
-    if (this.userSubs) { this.userSubs.unsubscribe(); }
-    if (this.conversationSubs) { this.conversationSubs.unsubscribe(); }
-    if (this.participantSubs) { this.participantSubs.unsubscribe(); }
-    if (this.messagesSubs) { this.messagesSubs.unsubscribe(); }
-    if (this.keyListenerSubscription) { this.keyListenerSubscription.unsubscribe(); }
-  }
-
-  main() {
-    this.getUser();
-    this.createForm();
-    this.getAllUsers();
-    this.getConversation();
-  }
-
-  getUser(){
-    this.theme = (JSON.parse(localStorage.getItem('user')) as UserModel).user.settings.darkTheme;
-    this.userSubs = this._db.getUser(this.currentUserId).valueChanges().subscribe((user : User) => {
-      this.user = user;
-      this.theme = user.settings.darkTheme;
-      this.notify = user.settings.notify;
-      localStorage.setItem('user', JSON.stringify(new UserModel(user, [])));
-    });
-  }
-
-  getAllUsers(){
-    this.users = this._db.getAllUsers().valueChanges() as Observable<User[]>;
-  }
-
-  getConversation(){
-    this.conversationSubs = this._db.getConversations(this.currentUserId).valueChanges().subscribe((cSnapShot : Conversation[]) => {
-      const cons : ConversationModel[] = [];
-      // console.log(cSnapShot);
-      cSnapShot.forEach(element => {
-        let conversation : ConversationModel = new ConversationModel(null,null,null);
-        conversation.conversation = element;
-        this.participantSubs = this._db.getParticipants(this.currentUserId,element.conversationId).valueChanges().subscribe((pSnapShot : Participant[]) => {
-          conversation.participants = pSnapShot;
-        });
-        this.subs.push(this.participantSubs);
-        this.messagesSubs = this._db.getMessages(this.currentUserId,element.conversationId).valueChanges().subscribe((mSnapShot : Message[]) => {
-          conversation.messages = mSnapShot;
-          if (this.selectedConversation && this.selectedConversation.conversation.conversationId === element.conversationId) {
-            const len : number = this.selectedConversation.messages.length >= mSnapShot.length ? this.selectedConversation.messages.length : mSnapShot.length;
-            for (let i = 0; i < len; i++) {
-              this.selectedConversation.messages[i] = mSnapShot[i];
-            }
-            this.scrollToBottom();
-            this.readMessage(this.selectedConversation);
-          }
-        });
-        this.subs.push(this.messagesSubs);
-        cons.push(conversation);
-        // console.log(cons);
-      });
-      this.conversations = cons;
-      // console.log(this.conversations);
-    })
-  }
-
-  // FORM
-  createForm() {
-    this.messageForm = this.formBuilder.group({
-      message: ['', Validators.required]
-    });
-  }
-
-  get f() { return this.messageForm.controls; }
-
-  onSubmit() {
-    console.log(this.f);
-    if (this.messageForm.invalid) {
-      console.log('invalid');
-    } else {
-      const m: string = this.f.message.value;
-      this.messageForm.reset();
-      const receiver: User = this.selectedConversation.participants.find(p => p.user.userId != this.currentUserId).user;
-      this._functions.sendMessage();
-      // this._db.sendMessage(m, this.selectedConversation, this.user, receiver).then(() => {
-      //   console.log('Message was sent succesfully');
-      // }).catch(e => {
-      //   this.messageForm.controls.name.setValue(m);
-      // });
-    }
-  }
-
-
-  // NAVIGATION
-
-  selectConversation(conversationId: string) {
-    this.selectedConversation = this.conversations.find(c => c.conversation.conversationId == conversationId);
-    console.log(this.selectedConversation);
-    this.changeParticipantStatus(this.selectedConversation,this.currentUserId,'online');
-    this.readMessage(this.selectedConversation);
-    this.keyListener();
-    this.scrollToBottom();
-  }
-
   changeParticipantStatus(selectedConversation : ConversationModel,userId,status : string){
     this._db.changeParticipantStatus(selectedConversation,userId,status);
   }
 
-  selectUser(user: User) {
-    this.selectedUser = user;
-    this.isProfileShow = true;
-  }
-
-  closeProfile() {
-    this.selectedUser = null;
-    this.isProfileShow = false;
-  }
-
-  //RIGHT
-
-  startConversation(selectedUser: User){
-    this._functions.createConversation(this.currentUserId,selectedUser.userId).subscribe((p : string) => {
-      console.log(p);
-      this.selectedConversation = this.conversations.find(i => i.conversation.conversationId = p);
-      console.log(this.selectedConversation);
-    },
-      (error) => {
-        console.log(error);
-      },
-      () => {
-        console.error('Request completed'); 
-      }
-    )
-    // .subscribe(
-    //   (response) => {                           //next() callback
-    //     console.log('response received');
-    //     console.log(response);
-    //   },
-    //   (error) => {                              //error() callback
-    //     console.error('Request failed with error');
-
-    //   },
-    //   () => {                                   //complete() callback
-    //     console.error('Request completed');      //This is actually not needed 
-
-    //   })
-    // const con: ConversationModel = this.conversations.find(c => c.participants.find(p => p.user.userId === selectedUser.userId));
-    // if (con) {
-    //   this.selectedConversation = con;
-    // }else{
-    //   this._functions.createConversation(this.currentUserId,selectedUser.userId).subscribe((p) => {
-    //     console.log(p);
-    //   })
-    // }
-  }
-
-  // startConversation(selectedUser: User) {
-  //   const con: ConversationModel = this.conversations.find(c => c.participants.find(p => p.user.userId === selectedUser.userId));
-  //   if (con) {
-  //     this.selectedConversation = con;
-  //   } else {
-  //     this.selectedConversation = this._db.startConversation(this.user, selectedUser);
-  //   }
-  // }
-
-  scrollToBottom(): void {
-    setTimeout(() => {
-      try {
-        if (this.pageHeight != this.myScrollContainer.nativeElement.scrollHeight) {
-          this.pageHeight = this.myScrollContainer.nativeElement.scrollHeight;
-          this.myScrollContainer.nativeElement.scrollTop = this.pageHeight;
-        }
-      } catch (err) {
-        // console.log('111111111111');
-      }
-    });
-  }
-
-  fcm(userId : string){
-    this._fcm.requestPermission(userId);
+  fcm(){
+    this._fcm.requestPermission(this.currentUserId);
     this._fcm.receiveMessage();
     this.message = this._fcm.currentMessage;
   }

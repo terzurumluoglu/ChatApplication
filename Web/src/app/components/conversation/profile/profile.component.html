@@ -1,0 +1,104 @@
+<div id="contact-information" [ngClass]="selectedUserInputChild ? 'sidebar active' : 'sidebar'">
+    <!-- <div id="contact-information" [ngClass]="isProfileShow ? 'sidebar active' : 'sidebar'"> -->
+    <header>
+        <span>About</span>
+        <ul class="list-inline">
+            <li class="list-inline-item">
+                <a class="btn btn-light sidebar-close">
+                    <i class="ti-close"></i>
+                </a>
+            </li>
+        </ul>
+    </header>
+    <div class="sidebar-body">
+        <div class="pl-4 pr-4 text-center">
+            <!-- <figure class="avatar avatar-state-danger avatar-xl mb-4"> -->
+            <figure class="avatar avatar-xl mb-4">
+                <img [src]="user?.avatar?.downloadURL || emptyAvatar" class="rounded-circle">
+                <!-- <img [src]="emptyAvatar" class="rounded-circle"> -->
+            </figure>
+            <h5 class="text-primary" [innerText]="user?.displayName">Frans Hanscombe</h5>
+            <p class="text-muted">Last seen: Today</p>
+        </div>
+        <hr>
+        <div class="pl-4 pr-4">
+            <ul class="list-inline">
+                <li class="list-inline-item" data-toggle="tooltip">
+                    <a class="btn btn-primary" data-toggle="modal" (click)="startConversation()">
+                        <!-- <i class="fa fa-users"></i> -->
+                        Message
+                    </a>
+                </li>
+                <li class="list-inline-item">
+                    <a class="btn btn-primary" data-toggle="tooltip">
+                        Follow
+                        <!-- <i class="ti-comment-alt"></i> -->
+                    </a>
+                </li>
+                <li class="list-inline-item">
+                    <a class="btn btn-danger" data-toggle="tooltip" title="">
+                        Block
+                        <!-- <i class="ti-comment-alt"></i> -->
+                    </a>
+                </li>
+
+            </ul>
+        </div>
+        <hr>
+        <div class="pl-4 pr-4" *ngIf="selectedUserInputChild?.bio">
+            <h6>About</h6>
+            <p class="text-muted" [innerText]="selectedUserInputChild?.bio"></p>
+        </div>
+        <hr *ngIf="user?.bio">
+        <!-- <div class="pl-4 pr-4">
+            <h6>Phone</h6>
+            <p class="text-muted">(555) 555 55 55</p>
+        </div>
+        <hr> -->
+        <div class="pl-4 pr-4">
+            <h6>Social Links</h6>
+            <ul class="list-inline social-links">
+                <li class="list-inline-item">
+                    <a class="btn btn-sm btn-floating btn-facebook">
+                        <i class="fa fa-facebook"></i>
+                    </a>
+                </li>
+                <li class="list-inline-item">
+                    <a class="btn btn-sm btn-floating btn-twitter">
+                        <i class="fa fa-twitter"></i>
+                    </a>
+                </li>
+                <li class="list-inline-item">
+                    <a class="btn btn-sm btn-floating btn-dribbble">
+                        <i class="fa fa-dribbble"></i>
+                    </a>
+                </li>
+                <!-- <li class="list-inline-item">
+                                    <a class="btn btn-sm btn-floating btn-whatsapp">
+                                        <i class="fa fa-whatsapp"></i>
+                                    </a>
+                                </li> -->
+                <li class="list-inline-item">
+                    <a class="btn btn-sm btn-floating btn-linkedin">
+                        <i class="fa fa-linkedin"></i>
+                    </a>
+                </li>
+                <li class="list-inline-item">
+                    <a class="btn btn-sm btn-floating btn-google">
+                        <i class="fa fa-google"></i>
+                    </a>
+                </li>
+                <!-- <li class="list-inline-item">
+                                    <a class="btn btn-sm btn-floating btn-behance">
+                                        <i class="fa fa-behance"></i>
+                                    </a>
+                                </li> -->
+                <li class="list-inline-item">
+                    <a class="btn btn-sm btn-floating btn-instagram">
+                        <i class="fa fa-instagram"></i>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>

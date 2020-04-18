@@ -50,7 +50,6 @@ export class LoginComponent implements OnInit {
       }
     }).catch(e => {
       this.loader = false;
-      console.log(e);
     })
   }
   // FORM

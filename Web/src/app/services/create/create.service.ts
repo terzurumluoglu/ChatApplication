@@ -46,12 +46,6 @@ export class CreateService {
     return conversation;
   }
 
-  createParticipantData(conversationId: string,participantId : string, user: User) : Participant {
-    let creationTime: number = this._tool.getTime();
-    let participant: Participant = new Participant(participantId,conversationId,false,1,creationTime,user);
-    return participant;
-  }
-
   createConversationModelData(conversation : Conversation, participants : Participant[],messages : Message[]){
     let conversationModel : ConversationModel = new ConversationModel(conversation,participants,messages);
     return conversationModel;
@@ -62,21 +56,5 @@ export class CreateService {
     const message : Message = new Message(null,1,messageContent,owner,conversationId,attachmentUrl,attachmentThumbUrl,creationTime,true,false,false,false);
     return message;
   }
-
-  
-  // createConversation(owner: User, receiver: User): ConversationModel[] {
-  //   let conversationId : string = this.firestore.collection('users').doc(owner.userId).collection('conversations').doc().id;
-  //   const con: Conversation = this.createConversationData(conversationId, owner);
-  //   const partKey1 : string = this.firestore.collection('users').doc(owner.userId).collection('conversations').doc(con.conversationId).collection('participants').doc().id;
-  //   const partKey2 : string = this.firestore.collection('users').doc(receiver.userId).collection('conversations').doc(con.conversationId).collection('participants').doc().id;
-  //   const part11: Participant = this.createParticipantData(con.conversationId, partKey1, owner);
-  //   const part12: Participant = this.createParticipantData(con.conversationId, partKey2, receiver);
-  //   const conModel1: ConversationModel = this.createConversationModelData(con, [part11, part12], []);
-  //   const part21: Participant = this.createParticipantData(con.conversationId, partKey1, seownernder);
-  //   const part22: Participant = this.createParticipantData(con.conversationId, partKey2, receiver);
-  //   const conModel2: ConversationModel = this.createConversationModelData(con, [part21, part22], []);
-
-  //   return [conModel1, conModel2];
-  // }
 
 }

@@ -17,12 +17,26 @@ const userRef = _db.collection('users');
 export const aaHelloWorld = functions.https.onRequest(async (req, res) => {
     corsHandler(req, res, async () => {
         try {
-            const timestamp : number = getTime();
+            const timestamp: number = getTime();
             console.log(timestamp);
             res.send('HELLO WORLD');
         } catch (error) {
             res.status(500).send(error);
         }
+    });
+})
+
+export const addDevice = functions.https.onRequest((req,res) => {
+    const ownerId : string = req.query.ownerId;
+    const token : string = req.query.token;
+    corsHandler(req, res, async () => {
+        const deviceRef = userRef.doc(ownerId).collection('devices');
+        const deviceRefKey: string = deviceRef.doc().id;
+        deviceRef.doc(deviceRefKey).set({ key: deviceRefKey, token: token }).then(p => {
+            res.send(true)
+        }).catch(e => {
+            res.status(500).send(false);
+        });
     });
 })
 
@@ -185,7 +199,7 @@ export const cloneMessage = functions.firestore.document('users/{userId}/convers
     console.log(message);
     console.log('part : ' + message.owner.userId);
 
-        userRef.doc(context.params.userId)
+    userRef.doc(context.params.userId)
         .collection('conversations').doc(context.params.conversationId)
         .collection('participants').get().then(async p => {
             // ADD CONVERSATION
@@ -193,45 +207,45 @@ export const cloneMessage = functions.firestore.document('users/{userId}/convers
                 const participant: Participant = element.data() as Participant;
                 if (message.owner.userId !== participant.user.userId) {
                     await userRef.doc(participant.user.userId)
-                    .collection('conversations').doc(context.params.conversationId)
-                    .collection('messages').doc(message.messageId).set({
-                        conversationId: message.conversationId,
-                        createdTime: message.createdTime,
-                        isActive: message.isActive,
-                        isDeleted: message.isDeleted,
-                        isRead: message.isRead,
-                        isSended: message.isSended,
-                        messageContent: message.messageContent,
-                        messageId: message.messageId,
-                        messageType: message.messageType,
-                        owner: {
-                            userId: message.owner.userId,
-                            email: message.owner.email,
-                            avatar: message.owner.avatar === null ? null : {
-                                avatarName: message.owner.avatar.avatarName,
-                                contentType: message.owner.avatar.contentType,
-                                deletedTime: message.owner.avatar.deletedTime,
-                                isActive: message.owner.avatar.isActive,
-                                isDeleted: message.owner.avatar.isDeleted,
-                                size: message.owner.avatar.size,
-                                downloadURL: message.owner.avatar.downloadURL
+                        .collection('conversations').doc(context.params.conversationId)
+                        .collection('messages').doc(message.messageId).set({
+                            conversationId: message.conversationId,
+                            createdTime: message.createdTime,
+                            isActive: message.isActive,
+                            isDeleted: message.isDeleted,
+                            isRead: message.isRead,
+                            isSended: message.isSended,
+                            messageContent: message.messageContent,
+                            messageId: message.messageId,
+                            messageType: message.messageType,
+                            owner: {
+                                userId: message.owner.userId,
+                                email: message.owner.email,
+                                avatar: message.owner.avatar === null ? null : {
+                                    avatarName: message.owner.avatar.avatarName,
+                                    contentType: message.owner.avatar.contentType,
+                                    deletedTime: message.owner.avatar.deletedTime,
+                                    isActive: message.owner.avatar.isActive,
+                                    isDeleted: message.owner.avatar.isDeleted,
+                                    size: message.owner.avatar.size,
+                                    downloadURL: message.owner.avatar.downloadURL
+                                },
+                                displayName: message.owner.displayName,
+                                bio: message.owner.bio,
+                                creationTime: message.owner.creationTime,
+                                isActive: message.owner.isActive,
+                                isDeleted: message.owner.isDeleted,
+                                settings: {
+                                    darkTheme: message.owner.settings.darkTheme,
+                                    isPrivate: message.owner.settings.isPrivate,
+                                    notify: message.owner.settings.notify
+                                },
+                                deletedTime: message.owner.deletedTime
                             },
-                            displayName: message.owner.displayName,
-                            bio: message.owner.bio,
-                            creationTime: message.owner.creationTime,
-                            isActive: message.owner.isActive,
-                            isDeleted: message.owner.isDeleted,
-                            settings: {
-                                darkTheme: message.owner.settings.darkTheme,
-                                isPrivate: message.owner.settings.isPrivate,
-                                notify: message.owner.settings.notify
-                            },
-                            deletedTime: message.owner.deletedTime
-                        },
-                        attachmentThumbUrl: message.attachmentThumbUrl,
-                        attachmentUrl: message.attachmentUrl,
-                        deletedTime: message.deletedTime,
-                    });
+                            attachmentThumbUrl: message.attachmentThumbUrl,
+                            attachmentUrl: message.attachmentUrl,
+                            deletedTime: message.deletedTime,
+                        });
                 }
             });
         }).catch(e => {
@@ -239,16 +253,44 @@ export const cloneMessage = functions.firestore.document('users/{userId}/convers
         })
 });
 
-export const sendMessage = functions.https.onRequest(async (req,res) => {
+export const sendMessage = functions.https.onRequest(async (req, res) => {
     corsHandler(req, res, async () => {
         const ownerId: string = req.query.ownerId;
-        const conversationId : string = req.query.conversationId;
-        const messageContent : string = req.query.messageContent;
+        const conversationId: string = req.query.conversationId;
+        const messageContent: string = req.query.messageContent;
         console.log(req.query);
-        writeMessage(ownerId,conversationId,messageContent,1).then(p => {
+        writeMessage(ownerId, conversationId, messageContent, 1).then(p => {
             res.send(p);
         }).catch(e => {
             res.status(500).send(e);
         });
     })
+})
+
+export const readMessage = functions.https.onRequest((req, res) => {
+    corsHandler(req, res, async () => {
+        const ownerId: string = req.query.ownerId;
+        const conversationId: string = req.query.conversationId;
+        const promiseArray: any[] = [];
+        userRef.doc(ownerId).collection('conversations').doc(conversationId).collection('participants').get().then(p => {
+            p.forEach(async element => {
+                const participant: Participant = element.data() as Participant;
+                const messages = await userRef.doc(participant.user.userId).collection('conversations').doc(conversationId).collection('messages').get();
+                messages.forEach(async el => {
+                    const message: Message = el.data() as Message;
+                    if (message.owner.userId !== ownerId) {
+                        promiseArray.push(userRef.doc(participant.user.userId).collection('conversations').doc(conversationId).collection('messages').doc(message.messageId).update('isRead', true));
+                    }
+                });
+            });
+            Promise.all(promiseArray).then(a => {
+                res.send(true);
+            }).catch(e => {
+                res.status(500).send(false);
+            })
+        }).catch(e => {
+            res.status(500).send(false);
+        }
+        );
+    });
 })

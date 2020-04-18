@@ -13,12 +13,11 @@ import { ErrorInterceptor } from 'src/app/helpers/error.interceptor';
 })
 export class FunctionsService {
 
-  // url1: 'https://us-central1-chatapp-e09a8.cloudfunctions.net/createConversation?ownerId=4wf8ahEv7XRXWKgxKwlG3ra5pW23&userId=TXngiVlkATWweTgek42Wv80o0Is2';
-  // url : 'https://us-central1-chatapp-e09a8.cloudfunctions.net/createConversation';
-
   pathGetUserByEmailAndPassword: string = 'getUserByEmailAndPassword/?';
   pathCreateConversation: string = 'createConversation';
   pathsendMessage: string = 'sendMessage';
+  pathReadMessage : string = 'readMessage';
+  pathAddDevice : string = 'addDevice';
 
   constructor(
     @Inject('apiUrl') private apiUrl,
@@ -33,11 +32,28 @@ export class FunctionsService {
   createConversation(ownerId: string, userId: string) {
     const url : string = this.apiUrl + this.pathCreateConversation;
     const params = new HttpParams().set('ownerId', ownerId).set('userId', userId);
-    const headers = this.headers();
+    const headers : HttpHeaders = this.headers();
     return this.http.get(url, { params, headers,responseType: 'text' }).pipe(catchError(this._error.handleError));
   }
 
-  sendMessage(){
-    
+  sendMessage(ownerId : string,conversationId : string,messageContent : string){
+    const url : string = this.apiUrl + this.pathsendMessage;
+    const params = new HttpParams().set('ownerId', ownerId).set('conversationId', conversationId).set('messageContent', messageContent);
+    const headers : HttpHeaders = this.headers();
+    return this.http.get(url,{params,headers,responseType : 'json'}).pipe(catchError(this._error.handleError));
+  }
+
+  readMessage(ownerId : string,conversationId : string){
+    const url : string = this.apiUrl + this.pathReadMessage;
+    const headers : HttpHeaders = this.headers();
+    const params = new HttpParams().set('ownerId', ownerId).set('conversationId', conversationId);
+    return this.http.get(url,{params,headers,responseType : 'json'}).pipe(catchError(this._error.handleError)).subscribe();
+  }
+
+  addDevice(ownerId: string, token: string) {
+    const url : string = this.apiUrl + this.pathAddDevice;
+    const headers : HttpHeaders = this.headers();
+    const params = new HttpParams().set('ownerId', ownerId).set('token', token);
+    return this.http.get(url,{params,headers,responseType : 'json'}).pipe(catchError(this._error.handleError)).subscribe();
   }
 }

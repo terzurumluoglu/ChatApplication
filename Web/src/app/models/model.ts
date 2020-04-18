@@ -139,14 +139,14 @@ export class Conversation {
 export class Participant {
     participantId: string;
     conversationId: string;
-    isOnline: boolean;
+    status: string;
     type: number;
     creationTime: number;
     user: User;
-    constructor(participantId: string, conversationId: string, isOnline: boolean, type: number, creationTime: number, user: User) {
+    constructor(participantId: string, conversationId: string, status: string, type: number, creationTime: number, user: User) {
         this.participantId = participantId;
         this.conversationId = conversationId;
-        this.isOnline = isOnline;
+        this.status = status;
         this.type = type;
         this.creationTime = creationTime;
         this.user = user;

@@ -6,6 +6,7 @@ import { mergeMapTo } from 'rxjs/operators';
 import { take } from 'rxjs/operators';
 import { BehaviorSubject } from 'rxjs'
 import { DatabaseService } from '../database/database.service';
+import { FunctionsService } from '../functions/functions.service';
 
 @Injectable({
   providedIn: 'root'
@@ -17,7 +18,9 @@ export class FcmService {
     private angularFirestore: AngularFirestore,
     private angularFireAuth: AngularFireAuth,
     private angularFireMessaging: AngularFireMessaging,
-    private _db : DatabaseService) {
+    private _db : DatabaseService,
+    private _functions : FunctionsService
+    ) {
     this.angularFireMessaging.messaging.subscribe(
       (_messaging) => {
         _messaging.onMessage = _messaging.onMessage.bind(_messaging);
@@ -40,7 +43,7 @@ export class FcmService {
     // we can change this function to request our backend service
     this.angularFireAuth.authState.pipe(take(1)).subscribe(
       () => {
-        this._db.addDevice(userId,token);
+        this._functions.addDevice(userId,token);
       });
   }
 

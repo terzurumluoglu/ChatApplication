@@ -1,0 +1,61 @@
+
+    <!-- setting modal -->
+    <div class="modal fade" id="settingModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-zoom" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="ti-settings"></i> Settings
+                    </h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <i class="ti-close"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <ul class="nav nav-tabs" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link active" data-toggle="tab" href="#manage" role="tab" aria-controls="account" aria-selected="true">Manage</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-toggle="tab" href="#notification" role="tab" aria-controls="notification" aria-selected="false">Notification</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-toggle="tab" href="#security" role="tab" aria-controls="contact" aria-selected="false">Security</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link delete" data-toggle="tab" href="#delete" role="tab" aria-controls="contact" aria-selected="false">Delete</a>
+                        </li>
+                    </ul>
+                    <div class="tab-content">
+                        <div class="tab-pane show active" id="manage" role="tabpanel">
+                            <div class="form-item custom-control custom-switch">
+                                <input type="checkbox" class="custom-control-input" [(ngModel)]="theme" (ngModelChange)="changeTheme(theme)" id="themeSwitch"/>
+                                <label class="custom-control-label" for="themeSwitch" [innerText]="theme ? 'Dark Theme' : 'Light Theme'"></label>
+                            </div>
+                        </div>
+                        <div class="tab-pane" id="notification" role="tabpanel">
+                            <div class="form-item custom-control custom-switch">
+                                <input type="checkbox" class="custom-control-input" [(ngModel)]="notify" (ngModelChange)="changeNotify(notify)" id="notifySwitch">
+                                <label class="custom-control-label" for="notifySwitch">Allow mobile notifications</label>
+                            </div>
+                        </div>
+                        <div class="tab-pane" id="security" role="tabpanel">
+                            <div class="form-item custom-control custom-switch">
+                                <input type="checkbox" class="custom-control-input" id="customSwitch9">
+                                <label class="custom-control-label" for="customSwitch9">Suggest changing passwords every month.</label>
+                            </div>
+                        </div>
+                        <div class="tab-pane" id="delete" role="tabpanel">
+                            <div class="form-item custom-control custom-switch">
+                                Delete
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- ./ setting modal -->

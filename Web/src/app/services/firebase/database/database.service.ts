@@ -5,6 +5,7 @@ import { ToolService } from '../../tool/tool.service';
 import { CreateService } from '../../create/create.service';
 import { User, UserModel, Device, Conversation, Participant, ConversationModel, Message, Settings, Avatar } from 'src/app/models/model';
 import { AngularFirestore } from "angularfire2/firestore";
+import { Observable, forkJoin } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -13,7 +14,7 @@ export class DatabaseService {
 
   firestore = firebase.firestore();
   userRef = this.firestore.collection('users');
-  // userRef : any = firebase.firestore().collection('users');
+  
   userModel: UserModel;
   constructor(
     private afs: AngularFirestore,
@@ -31,8 +32,13 @@ export class DatabaseService {
             b.forEach(it => {
               this.userRef.doc(user.userId).collection('conversations').doc(item.data().conversationId).collection('participants').doc(it.data().participantId).delete();
             });
-            this.userRef.doc(user.userId).collection('conversations').doc(item.data().conversationId).delete();
-           })
+           });
+           this.userRef.doc(user.userId).collection('conversations').doc(item.data().conversationId).collection('messages').get().then(b => {
+            b.forEach(it => {
+              this.userRef.doc(user.userId).collection('conversations').doc(item.data().conversationId).collection('messages').doc(it.data().messageId).delete();
+            });
+           });
+           this.userRef.doc(user.userId).collection('conversations').doc(item.data().conversationId).delete();
          });
        }) 
       });
@@ -70,53 +76,6 @@ export class DatabaseService {
     return user;
   }
 
-  // // REGISTER
-  // async addUser(credential: firebase.auth.UserCredential,firstname: string) {
-  //   const user: User = this._create.createUserData(firstname, credential);
-  //   const a : User = {
-  //     userId: user.userId,
-  //     firstname: user.firstname,
-  //     email: user.email,
-  //     creationTime: user.creationTime,
-  //     settings: {
-  //       isPrivate: user.settings.isPrivate,
-  //       darkTheme: user.settings.darkTheme,
-  //       notify: user.settings.notify
-  //     },
-  //     avatar : {
-  //       avatarName : null,
-  //       contentType : null,
-  //       deletedTime : null,
-  //       isActive : true,
-  //       isDeleted : false,
-  //       size : null,
-  //       downloadURL : credential.user.photoURL
-  //     },
-  //     bio : null,
-  //     isActive: true,
-  //     isDeleted: false,
-  //     deletedTime: null,
-
-  //   }
-  //   await this.userRef.doc(user.userId).set({
-  //     userId: user.userId,
-  //     firstname: user.firstname,
-  //     // lastname: user.lastname,
-  //     email: user.email,
-  //     creationTime: user.creationTime,
-  //     settings: {
-  //       isPrivate: user.settings.isPrivate,
-  //       darkTheme: user.settings.darkTheme,
-  //       notify: user.settings.notify
-  //     },
-  //     isActive: true,
-  //     isDeleted: false,
-  //     deletedTime: null,
-
-  //   });
-  //   return user;
-  // }
-
   updateUserDataByUserId(uid: string, key: string, value: any) {
     return this.userRef.doc(uid).update(key, value);
   }
@@ -131,32 +90,10 @@ export class DatabaseService {
     });
   }
 
-  addDevice(uid: string, token: string) {
-    const deviceRef = this.userRef.doc(uid).collection('devices');
-    const deviceRefKey : string = deviceRef.doc().id;
-    deviceRef.doc(deviceRefKey).set({key : deviceRefKey,token : token});
-  }
-
   addAvatar(uid: string, file: File, fileName: string, contentType: string, downloadURL: string) {
     let data: Avatar = this._create.createAvatarData(fileName, contentType, file.size, downloadURL);
     return this.updateUserDataByUserId(uid, 'avatar', (Object.assign({}, data)));
   }
-
-  // startConversation(sender: User, receiver: User): ConversationModel {
-  //   const datas: ConversationModel[] = this._create.createConversation(sender, receiver);
-  //   let senderConRef = this.userRef.doc(sender.userId).collection('conversations');
-  //   let receiverConRef = this.userRef.doc(receiver.userId).collection('conversations');
-  //   const refS: firebase.firestore.CollectionReference<firebase.firestore.DocumentData>[] = [senderConRef, receiverConRef];
-  //   for (let i = 0; i < datas.length; i++) {
-  //     let conRef = refS[i];
-  //     conRef.doc(datas[i].conversation.conversationId).set(Object.assign({}, datas[i].conversation));
-  //     datas[i].participants.forEach(element => {
-  //       let partRef = conRef.doc(datas[i].conversation.conversationId).collection('participants');
-  //       partRef.doc(element.participantId).set(Object.assign({}, element));
-  //     });
-  //   }
-  //   return datas[0];
-  // }
 
   getUser(userId: string) {
     return this.afs.collection('users').doc(userId);
@@ -167,48 +104,42 @@ export class DatabaseService {
   }
 
   getConversations(userId: string) {
-    return this.afs.collection('users').doc(userId).collection('conversations',ref=> ref.where('isDeleted','==',false));
-  }
-
-  // delete(userId: string){
-  //   this.getConversations(userId).get().subscribe(p => {
-  //     this.angularFirestore.collection('users').doc(userId).collection('conversations').doc(p.docs[0].id).delete();
-  //   });
-  // }
-
-  readMessage(conversationId : string,messages: Message[],participants :  Participant[]) {
-    for (let i = 0; i < participants.length; i++) {
-      for (let j = 0; j < messages.length; j++) {
-        console.log(participants[i].user.userId + '/' + conversationId + '/' + messages[j].messageId);
-        this.userRef.doc(participants[i].user.userId)
-        .collection('conversations').doc(conversationId)
-        .collection('messages').doc(messages[j].messageId).update('isRead',true);
-      }
-    }
+    return this.afs.collection('users').doc(userId).collection('conversations',ref=> ref.where('isDeleted','==',false)).valueChanges();
   }
 
   getParticipants(userId: string, conversationId: string) {
-    return this.afs.collection('users').doc(userId).collection('conversations').doc(conversationId).collection('participants');
+    return this.afs.collection('users').doc(userId).collection('conversations').doc(conversationId).collection('participants').valueChanges();
   }
 
   getMessages(userId: string, conversationId: string) {
-    return this.afs.collection('users').doc(userId).collection('conversations').doc(conversationId).collection('messages', ref => ref.orderBy('createdTime', 'asc'));
+    return this.afs.collection('users').doc(userId).collection('conversations').doc(conversationId).collection('messages', ref => ref.orderBy('createdTime', 'asc')).valueChanges();
   }
 
   updateConversationDataByConversationId(uid: string, conversationId: string, key: string, value: any) {
     return this.userRef.doc(uid).collection('conversations').doc(conversationId).update(key, value);
   }
 
-  // sendMessage(messageContent: string, conversation: ConversationModel, owner: User, receiver: User) {
-  //   const message: Message = this._create.createMessageData(messageContent, owner, conversation.conversation.conversationId, null, null);
-  //   if (conversation.conversation.isActive === false) {
-  //     this.updateConversationDataByConversationId(owner.userId, conversation.conversation.conversationId, 'isActive', true);
-  //     this.updateConversationDataByConversationId(receiver.userId, conversation.conversation.conversationId, 'isActive', true);
-  //   }
-  //   var senderMessageRef = this.userRef.doc(owner.userId).collection('conversations').doc(conversation.conversation.conversationId).collection('messages');
-  //   var receiverMessageRef = this.userRef.doc(receiver.userId).collection('conversations').doc(conversation.conversation.conversationId).collection('messages');
-  //   const key: string = senderMessageRef.doc().id;
-  //   message.messageId = key;
-  //   return Promise.all([senderMessageRef.doc(key).set(Object.assign({}, message)), receiverMessageRef.doc(key).set(Object.assign({}, message))]);
+  // async hasConversation(currentUserId : string,guestId : string){
+  //   const conversations = await this.userRef.doc(currentUserId).collection('conversations').get();
+  //   conversations.forEach(async element => {
+  //     const c = await this.userRef.doc(guestId).collection('conversations').doc(element.id).get();
+  //   });
+  // }
+
+  //     this.userRef.doc(currentUserId).collection('conversations').get().then(p => {
+  //       for (let i = 0; i < p.docs.length; i++) {
+  //         this.userRef.doc(guestId).collection('conversations').doc('p.docs[i].id').get().then(r => {
+  //           if (r.data()) {
+  //             res(r.data().conversationId);
+  //           }
+  //         }).catch(e => {
+  //           rej(e);
+  //         });
+  //       }
+  //     })
+  //     .catch(e => {
+  //       rej(e);
+  //     });
+  //   })
   // }
 }
